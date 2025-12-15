@@ -19,7 +19,7 @@ enum EventCategory: String, CaseIterable, Codable, Identifiable {
         
         var id: String { self.rawValue }
         
-        // Associe une icône système (SF Symbols) à chaque catégorie
+        // Associe une icône système à chaque catégorie
         var systemImageName: String {
                 switch self {
                 case .music: return "music.mic"

@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		2285A2072EF00B45000D512A /* EventoriasApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A2062EF00B45000D512A /* EventoriasApp.swift */; };
-		2285A2092EF00B45000D512A /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A2082EF00B45000D512A /* RootView.swift */; };
 		2285A20B2EF00B47000D512A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2285A20A2EF00B47000D512A /* Assets.xcassets */; };
 		2285A2362EF01C20000D512A /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A2352EF01C20000D512A /* Event.swift */; };
 		2285A2382EF01CB4000D512A /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A2372EF01CB4000D512A /* User.swift */; };
@@ -17,9 +16,7 @@
 		2285A2412EF034CC000D512A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 2285A23F2EF034CC000D512A /* GoogleService-Info.plist */; };
 		2285A2442EF0386B000D512A /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 2285A2432EF0386B000D512A /* FirebaseAuth */; };
 		2285A2462EF0386B000D512A /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 2285A2452EF0386B000D512A /* FirebaseFirestore */; };
-		2285A2482EF03F95000D512A /* EventListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A2472EF03F95000D512A /* EventListView.swift */; };
 		2285A24A2EF03FF0000D512A /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A2492EF03FF0000D512A /* AuthViewModel.swift */; };
-		2285A24C2EF040DE000D512A /* LogInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A24B2EF040DE000D512A /* LogInView.swift */; };
 		2285A24E2EF0438F000D512A /* EventCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A24D2EF0438F000D512A /* EventCategory.swift */; };
 /* End PBXBuildFile section */
 
@@ -43,7 +40,6 @@
 /* Begin PBXFileReference section */
 		2285A2032EF00B45000D512A /* Eventorias.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Eventorias.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2285A2062EF00B45000D512A /* EventoriasApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventoriasApp.swift; sourceTree = "<group>"; };
-		2285A2082EF00B45000D512A /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		2285A20A2EF00B47000D512A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2285A2102EF00B47000D512A /* EventoriasTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EventoriasTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2285A21A2EF00B47000D512A /* EventoriasUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EventoriasUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -51,9 +47,7 @@
 		2285A2372EF01CB4000D512A /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		2285A23D2EF0249E000D512A /* EventListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventListViewModel.swift; sourceTree = "<group>"; };
 		2285A23F2EF034CC000D512A /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		2285A2472EF03F95000D512A /* EventListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventListView.swift; sourceTree = "<group>"; };
 		2285A2492EF03FF0000D512A /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
-		2285A24B2EF040DE000D512A /* LogInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogInView.swift; sourceTree = "<group>"; };
 		2285A24D2EF0438F000D512A /* EventCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventCategory.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -66,6 +60,21 @@
 		2285A21D2EF00B47000D512A /* EventoriasUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = EventoriasUITests;
+			sourceTree = "<group>";
+		};
+		2285A2512EF064E2000D512A /* EventDetailView */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = EventDetailView;
+			sourceTree = "<group>";
+		};
+		2285A2522EF064FD000D512A /* EventListView */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = EventListView;
+			sourceTree = "<group>";
+		};
+		2285A2532EF0651F000D512A /* AuthView */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = AuthView;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -128,7 +137,6 @@
 			isa = PBXGroup;
 			children = (
 				2285A2062EF00B45000D512A /* EventoriasApp.swift */,
-				2285A2082EF00B45000D512A /* RootView.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -168,8 +176,9 @@
 		2285A23B2EF0245A000D512A /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				2285A2472EF03F95000D512A /* EventListView.swift */,
-				2285A24B2EF040DE000D512A /* LogInView.swift */,
+				2285A2532EF0651F000D512A /* AuthView */,
+				2285A2522EF064FD000D512A /* EventListView */,
+				2285A2512EF064E2000D512A /* EventDetailView */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -197,6 +206,11 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				2285A2512EF064E2000D512A /* EventDetailView */,
+				2285A2522EF064FD000D512A /* EventListView */,
+				2285A2532EF0651F000D512A /* AuthView */,
 			);
 			name = Eventorias;
 			packageProductDependencies = (
@@ -333,13 +347,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				2285A2362EF01C20000D512A /* Event.swift in Sources */,
-				2285A2482EF03F95000D512A /* EventListView.swift in Sources */,
 				2285A24E2EF0438F000D512A /* EventCategory.swift in Sources */,
-				2285A2092EF00B45000D512A /* RootView.swift in Sources */,
 				2285A24A2EF03FF0000D512A /* AuthViewModel.swift in Sources */,
 				2285A23E2EF0249E000D512A /* EventListViewModel.swift in Sources */,
 				2285A2382EF01CB4000D512A /* User.swift in Sources */,
-				2285A24C2EF040DE000D512A /* LogInView.swift in Sources */,
 				2285A2072EF00B45000D512A /* EventoriasApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

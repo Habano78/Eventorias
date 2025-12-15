@@ -1,5 +1,5 @@
 //
-//  LogInView.swift
+//  AuthentificationView.swift
 //  Eventorias
 //
 //  Created by Perez William on 15/12/2025.
@@ -10,10 +10,11 @@ import SwiftUI
 import SwiftUI
 
 struct AuthentificationView: View {
-    // 1. On reçoit le ViewModel (le cerveau) pour lui donner des ordres
+    
+        //MARK: dependencies
     var viewModel: AuthViewModel
     
-    // 2. Variables locales pour stocker ce que l'utilisateur tape
+    //MARK: properties
     @State private var email = ""
     @State private var password = ""
     @State private var isLoginMode = true // true = Connexion, false = Inscription
@@ -21,33 +22,32 @@ struct AuthentificationView: View {
     var body: some View {
         VStack(spacing: 20) {
             
-            // Titre dynamique
             Text(isLoginMode ? "Connexion" : "Inscription")
                 .font(.largeTitle)
                 .fontWeight(.bold)
             
-            // Champ Email
+            // Email
             TextField("Email", text: $email)
                 .keyboardType(.emailAddress)
-                .autocapitalization(.none) // Important pour les emails !
+                .autocapitalization(.none)
                 .padding()
                 .background(Color(.secondarySystemBackground))
                 .cornerRadius(10)
             
-            // Champ Mot de passe
+            // Mot de passe
             SecureField("Mot de passe", text: $password)
                 .padding()
                 .background(Color(.secondarySystemBackground))
                 .cornerRadius(10)
             
-            // Affichage des erreurs éventuelles (rouge)
+            //  erreurs éventuelles
             if let errorMessage = viewModel.errorMessage {
                 Text(errorMessage)
                     .foregroundStyle(.red)
                     .font(.caption)
             }
             
-            // Bouton Principal (Action)
+            // Bouton Principal
             Button {
                 if isLoginMode {
                     viewModel.signIn(email: email, password: password)
@@ -63,7 +63,7 @@ struct AuthentificationView: View {
                     .cornerRadius(10)
             }
             
-            // Bouton de bascule (Switch mode)
+            // Bouton de bascule
             Button {
                 withAnimation {
                     isLoginMode.toggle()
@@ -78,6 +78,5 @@ struct AuthentificationView: View {
 }
 
 #Preview {
-    // Pour la prévisualisation dans Xcode, on injecte un ViewModel vide
     AuthentificationView(viewModel: AuthViewModel())
 }

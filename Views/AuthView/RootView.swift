@@ -8,16 +8,19 @@
 import SwiftUI
 
 struct RootView: View {
-        // On instancie le ViewModel ici. C'est le "propriétaire" de l'état de connexion.
+        
+        //MARK: instantiation
         @State private var authViewModel = AuthViewModel()
         
-        var body: some View {
         
+        var body: some View {
+                
                 if authViewModel.userSession != nil {
                         
-                        EventListView(authViewModel: authViewModel)
+                        AppTabView(authViewModel: authViewModel)
+                        
                 } else {
-                        LoginView(viewModel: authViewModel)
+                        AuthentificationView(viewModel: authViewModel)
                 }
         }
 }
