@@ -62,19 +62,24 @@
 			path = EventoriasUITests;
 			sourceTree = "<group>";
 		};
-		2285A2512EF064E2000D512A /* EventDetailView */ = {
+		2285A2532EF0651F000D512A /* Authentification */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = EventDetailView;
+			path = Authentification;
 			sourceTree = "<group>";
 		};
-		2285A2522EF064FD000D512A /* EventListView */ = {
+		2285A2582EF079CD000D512A /* Events */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = EventListView;
+			path = Events;
 			sourceTree = "<group>";
 		};
-		2285A2532EF0651F000D512A /* AuthView */ = {
+		2285A25F2EF16265000D512A /* Root */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = AuthView;
+			path = Root;
+			sourceTree = "<group>";
+		};
+		2285A2602EF162F6000D512A /* Profile */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Profile;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -176,9 +181,10 @@
 		2285A23B2EF0245A000D512A /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				2285A2532EF0651F000D512A /* AuthView */,
-				2285A2522EF064FD000D512A /* EventListView */,
-				2285A2512EF064E2000D512A /* EventDetailView */,
+				2285A25F2EF16265000D512A /* Root */,
+				2285A2532EF0651F000D512A /* Authentification */,
+				2285A2582EF079CD000D512A /* Events */,
+				2285A2602EF162F6000D512A /* Profile */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -208,9 +214,10 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				2285A2512EF064E2000D512A /* EventDetailView */,
-				2285A2522EF064FD000D512A /* EventListView */,
-				2285A2532EF0651F000D512A /* AuthView */,
+				2285A2532EF0651F000D512A /* Authentification */,
+				2285A2582EF079CD000D512A /* Events */,
+				2285A25F2EF16265000D512A /* Root */,
+				2285A2602EF162F6000D512A /* Profile */,
 			);
 			name = Eventorias;
 			packageProductDependencies = (

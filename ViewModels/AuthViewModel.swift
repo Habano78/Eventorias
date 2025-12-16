@@ -29,8 +29,7 @@ class AuthViewModel {
                 self.errorMessage = "Erreur : \(error.localizedDescription)"
                 return
             }
-            // Succès : on met à jour la session
-            self.userSession = result?.user
+            self.userSession = result?.user /// Succès : on met à jour la session
             self.errorMessage = nil
         }
     }

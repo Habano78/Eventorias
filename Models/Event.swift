@@ -18,7 +18,7 @@ struct Event: Identifiable, Codable, Hashable {
         var imageURL: String?
         var attendees: [String]
         
-        // Initialiseur personnalisé pour simplifier la création
+        //MARK: init
         init(id: String = UUID().uuidString,
              userId: String,
              title: String,

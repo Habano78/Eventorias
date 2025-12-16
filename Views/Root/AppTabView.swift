@@ -14,24 +14,19 @@ struct AppTabView: View {
         
         //MARK: body
         var body: some View {
+                
                 TabView {
                         
                         EventListView(authViewModel: authViewModel)
                                 .tabItem {
-                                        Label("Explorer", systemImage: "calendar")
+                                        Image ("Button - Event")
                                 }
                         
-                        Text("Écran de création à venir")
+                        ProfileView(authViewModel: authViewModel)
                                 .tabItem {
-                                        Label("Créer", systemImage: "plus.circle.fill")
-                                }
-                        
-                        Text("Écran de profil à venir")
-                                .tabItem {
-                                        Label("Profil", systemImage: "person.crop.circle")
+                                        Image ("Button - Profile")
                                 }
                 }
-                .tint(.blue)
         }
 }
 

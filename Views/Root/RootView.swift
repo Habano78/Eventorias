@@ -15,12 +15,12 @@ struct RootView: View {
         
         var body: some View {
                 
+                // Dans RootView.swift
+                
                 if authViewModel.userSession != nil {
-                        
                         AppTabView(authViewModel: authViewModel)
-                        
                 } else {
-                        AuthentificationView(viewModel: authViewModel)
+                        WelcomeView(authViewModel: authViewModel)
                 }
         }
 }
