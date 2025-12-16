@@ -6,28 +6,21 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
-struct Event: Identifiable, Codable, Hashable {
-        let id: String
-        let userId: String
-        var title: String
-        var description: String
-        var date: Date
-        var location: String
-        var category: EventCategory
-        var imageURL: String?
-        var attendees: [String]
+struct Event: Identifiable, Codable {
         
-        //MARK: init
-        init(id: String = UUID().uuidString,
-             userId: String,
-             title: String,
-             description: String,
-             date: Date,
-             location: String,
-             category: EventCategory,
-             imageURL: String? = nil,
-             attendees: [String] = []) {
+        @DocumentID var id: String? /// ID  géré automatiquement par Firestore
+        
+        let userId: String
+        let title: String
+        let description: String
+        let date: Date
+        let location: String
+        let category: EventCategory
+        
+        //Init
+        init(id: String? = nil, userId: String, title: String, description: String, date: Date, location: String, category: EventCategory) {
                 self.id = id
                 self.userId = userId
                 self.title = title
@@ -35,8 +28,5 @@ struct Event: Identifiable, Codable, Hashable {
                 self.date = date
                 self.location = location
                 self.category = category
-                self.imageURL = imageURL
-                self.attendees = attendees
         }
-        
 }

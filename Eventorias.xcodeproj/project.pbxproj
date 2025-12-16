@@ -18,6 +18,7 @@
 		2285A2462EF0386B000D512A /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 2285A2452EF0386B000D512A /* FirebaseFirestore */; };
 		2285A24A2EF03FF0000D512A /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A2492EF03FF0000D512A /* AuthViewModel.swift */; };
 		2285A24E2EF0438F000D512A /* EventCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A24D2EF0438F000D512A /* EventCategory.swift */; };
+		2285A2622EF16DAD000D512A /* DIContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A2612EF16DAD000D512A /* DIContainer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +50,7 @@
 		2285A23F2EF034CC000D512A /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		2285A2492EF03FF0000D512A /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
 		2285A24D2EF0438F000D512A /* EventCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventCategory.swift; sourceTree = "<group>"; };
+		2285A2612EF16DAD000D512A /* DIContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DIContainer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -142,6 +144,7 @@
 			isa = PBXGroup;
 			children = (
 				2285A2062EF00B45000D512A /* EventoriasApp.swift */,
+				2285A2612EF16DAD000D512A /* DIContainer.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -358,6 +361,7 @@
 				2285A24A2EF03FF0000D512A /* AuthViewModel.swift in Sources */,
 				2285A23E2EF0249E000D512A /* EventListViewModel.swift in Sources */,
 				2285A2382EF01CB4000D512A /* User.swift in Sources */,
+				2285A2622EF16DAD000D512A /* DIContainer.swift in Sources */,
 				2285A2072EF00B45000D512A /* EventoriasApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

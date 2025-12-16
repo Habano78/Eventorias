@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
 struct AddEventView: View {
         
@@ -49,6 +50,20 @@ struct AddEventView: View {
                                                 .frame(height: 100)
                                 }
                         }
+                        HStack{ // A ACTIVAR
+                                Image("Button - Camera")
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 50, height: 50)
+                                        .clipShape(Rectangle())
+                                Image("Button - Attach photo")
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 50, height: 50)
+                                        .clipShape(Rectangle())
+                        }
+                        .padding(70)
+                        
                         .navigationTitle("Nouvel Événement")
                         .navigationBarTitleDisplayMode(.inline)
                         .toolbar {
@@ -63,14 +78,19 @@ struct AddEventView: View {
                                 ToolbarItem(placement: .confirmationAction) {
                                         
                                         Button("Créer") {
-                                                viewModel.addEvent(
-                                                        title: title,
-                                                        description: description,
-                                                        date: date,
-                                                        location: location,
-                                                        category: selectedCategory
-                                                )
-                                                dismiss()
+                                                if let currentUserId = Auth.auth().currentUser?.uid {
+                                                        viewModel.addEvent(
+                                                                title: title,
+                                                                description: description,
+                                                                date: date,
+                                                                location: location,
+                                                                category: selectedCategory,
+                                                                userId: currentUserId
+                                                        )
+                                                        dismiss()
+                                                } else {
+                                                        print("Erreur : Personne n'est connecté")
+                                                }
                                         }
                                         .disabled(title.isEmpty)
                                 }

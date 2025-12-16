@@ -9,14 +9,12 @@ import SwiftUI
 
 struct RootView: View {
         
-        //MARK: instantiation
-        @State private var authViewModel = AuthViewModel()
+        //MARK: dependence
+        var authViewModel: AuthViewModel
         
         
         var body: some View {
-                
-                // Dans RootView.swift
-                
+        
                 if authViewModel.userSession != nil {
                         AppTabView(authViewModel: authViewModel)
                 } else {
