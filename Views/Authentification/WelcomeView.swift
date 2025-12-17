@@ -9,18 +9,20 @@ import SwiftUI
 
 struct WelcomeView: View {
         
-        var authViewModel: AuthViewModel
+        //MARK: dependence
+        @Environment(AuthViewModel.self) var authViewModel
         
+        //MARK: body
         var body: some View {
                 NavigationStack {
                         ZStack {
-                                // 1. Fond Noir Total
+                                
                                 Color.black.ignoresSafeArea()
                                 
                                 VStack(spacing: 30) {
                                         Spacer()
                                         
-                                        // Logo et Titre
+                                        // Logo/Titre
                                         VStack(spacing: 20) {
                                                 
                                                 Image("Logo")
@@ -29,7 +31,7 @@ struct WelcomeView: View {
                                                         .frame(width: 100, height: 100)
                                                 // .colorInvert()
                                                 
-                                                // Texte EVENTORIAS
+                                                // Texte
                                                 Text("EVENTORIAS")
                                                         .font(.custom("Times New Roman", size: 35))
                                                         .fontWeight(.bold)
@@ -63,5 +65,6 @@ struct WelcomeView: View {
 }
 
 #Preview {
-        WelcomeView(authViewModel: AuthViewModel())
+        WelcomeView()
+                .environment(AuthViewModel())
 }

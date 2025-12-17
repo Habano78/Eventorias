@@ -10,15 +10,15 @@ import SwiftUI
 struct RootView: View {
         
         //MARK: dependence
-        var authViewModel: AuthViewModel
+        @Environment(AuthViewModel.self) var authViewModel
         
-        
+        //MARK: body
         var body: some View {
         
                 if authViewModel.userSession != nil {
-                        AppTabView(authViewModel: authViewModel)
+                        AppTabView()
                 } else {
-                        WelcomeView(authViewModel: authViewModel)
+                        WelcomeView()
                 }
         }
 }

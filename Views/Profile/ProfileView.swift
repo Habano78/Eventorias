@@ -10,7 +10,9 @@ import FirebaseAuth
 
 struct ProfileView: View {
         
-        var authViewModel: AuthViewModel
+        //MARK: properties
+        @Environment(EventListViewModel.self) var eventViewModel
+        @Environment(AuthViewModel.self) var authViewModel
         
         //MARK: body
         var body: some View {
@@ -19,7 +21,7 @@ struct ProfileView: View {
                                 
                                 // Avatar et Infos
                                 VStack(spacing: 15) {
-                                       
+                                        
                                         Image("Avatar (4)")
                                                 .resizable()
                                                 .aspectRatio(contentMode: .fill)
@@ -32,7 +34,7 @@ struct ProfileView: View {
                                         
                                         // Infos Texte
                                         VStack(spacing: 5) {
-                                                Text("Alejandro Sans") 
+                                                Text("Alejandro Sans")
                                                         .font(.title2)
                                                         .fontWeight(.bold)
                                                         .foregroundStyle(.white)
@@ -57,10 +59,19 @@ struct ProfileView: View {
                                                         Label("Modifier le profil", systemImage: "pencil")
                                                 }
                                                 
-                                                NavigationLink {
-                                                        Text("Liste de mes tickets")
-                                                } label: {
-                                                        Label("Mes événements", systemImage: "ticket")
+                                                NavigationLink(destination: MyEventsView()) {
+                                                        HStack {
+                                                                Image(systemName: "ticket.fill")
+                                                                        .foregroundStyle(.white)
+                                                                Text("Mes Evenements")
+                                                                        .foregroundStyle(.white)
+                                                                Spacer()
+                                                                Image(systemName: "chevron.right")
+                                                                        .foregroundStyle(.gray)
+                                                        }
+                                                        .padding()
+                                                        .background(Color(white: 0.1))
+                                                        .cornerRadius(10)
                                                 }
                                                 
                                                 NavigationLink {
@@ -94,6 +105,10 @@ struct ProfileView: View {
 }
 
 #Preview {
-        ProfileView(authViewModel: AuthViewModel())
-                .preferredColorScheme(.dark)
+        
+        let container = DIContainer()
+        
+        ProfileView()
+                .environment(container.authViewModel)
+                .environment(container.eventListViewModel)
 }

@@ -10,7 +10,7 @@ import SwiftUI
 struct AppTabView: View {
         
         //MARK: dependencies
-        var authViewModel: AuthViewModel
+        @Environment(AuthViewModel.self) var authViewModel
         
         //MARK: body
         var body: some View {
@@ -22,7 +22,7 @@ struct AppTabView: View {
                                         Image ("Button - Event")
                                 }
                         
-                        ProfileView(authViewModel: authViewModel)
+                        ProfileView()
                                 .tabItem {
                                         Image ("Button - Profile")
                                 }
@@ -31,5 +31,6 @@ struct AppTabView: View {
 }
 
 #Preview {
-        AppTabView(authViewModel: AuthViewModel())
+        AppTabView()
+                .environment(AuthViewModel())
 }
