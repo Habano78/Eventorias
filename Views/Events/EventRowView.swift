@@ -8,51 +8,63 @@
 import SwiftUI
 
 struct EventRowView: View {
-       
-        //MARK: dependence
+        
+        //MARK: properties
         let event: Event
+        
+        private var formattedDate: String {
+                event.date.formatted(date: .long, time: .omitted)
+        }
         
         //MARK: body
         var body: some View {
                 
-                HStack(spacing: 15) {
+                HStack(spacing: 0) {
                         
-                        // User Image
-                        Image("Avatar (1)")
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 50, height: 50)
-                                .clipShape(Circle())
-                        
-                        // Infos
-                        VStack(alignment: .leading, spacing: 5) {
-                                Text(event.title)
-                                        .font(.headline)
-                                        .foregroundStyle(.white)
+                        // Avatar/Titre/Date
+                        HStack(spacing: 12) {
+                               
+                                Image(systemName: "person.crop.circle.fill")
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: 50, height: 50)
+                                        .clipShape(Circle())
                                 
-                                Text(event.date.formatted(date: .long, time: .omitted))
-                                        .font(.caption)
-                                        .foregroundStyle(.gray)
+                                VStack(alignment: .leading, spacing: 10) {
+                                        
+                                        Text(event.title)
+                                                .font(.headline)
+                                                .fontWeight(.bold)
+                                                .foregroundStyle(.white)
+                                                .lineLimit(2)
+                                        
+                                        Text(event.date.formatted(.dateTime.year().month(.wide).day()))
+                                                .font(.subheadline)
+                                                .foregroundStyle(.gray)
+                                }
                         }
+                        .padding(14)
                         
                         Spacer()
                         
                         // Event Image
                         Image(event.category.assetName)
                                 .resizable()
-                                .scaledToFill()
-                                .frame(width: 100, height: 70)
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 130, height: 100)
+                                .clipped()
                 }
-                .padding()
-                .background(Color(white: 0.2))
-                .cornerRadius(15)
+                .background(Color(white: 0.1))
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+               
         }
 }
 
-//MARK: preview
+// MARK: - Preview
 #Preview {
-        EventRowView(event: Event(userId: "1", title: "Test Event", description: "", date: Date(), location: "Paris", category: .food))
-                .padding()
-                .background(Color.black)
+        ZStack {
+                Color.black.ignoresSafeArea()
+                EventRowView(event: Event(userId: "1", title: "Music Festival", description: "Test", date: Date(), location: "Paris", category: .music))
+                        .padding()
+        }
 }

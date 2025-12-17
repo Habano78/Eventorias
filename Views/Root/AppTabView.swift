@@ -17,7 +17,7 @@ struct AppTabView: View {
                 
                 TabView {
                         
-                        EventListView(authViewModel: authViewModel)
+                        EventListView()
                                 .tabItem {
                                         Image ("Button - Event")
                                 }

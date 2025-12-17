@@ -5,55 +5,34 @@
 //  Created by Perez William on 15/12/2025.
 //
 
-
 import Foundation
 import Observation
-import FirebaseFirestore
+import FirebaseAuth
 
 @Observable
 class EventListViewModel {
         
+        //MARK: properties
         var events: [Event] = []
         
-        private var dataBase = Firestore.firestore()
+        private let service: Service
         
         //MARK: init
-        init() {
+        init(service: Service = Service()) {
+                self.service = service
                 fetchEvents()
         }
         
-        // MARK: Récupération
+        // MARK: lecture
         func fetchEvents() {
-                
-                dataBase.collection("events").addSnapshotListener { [weak self] snapshot, error in
-                        
-                        // Gestion des erreurs
-                        if let error = error {
-                                print("❌ Erreur de chargement Firestore: \(error.localizedDescription)")
-                                return
-                        }
-                        
-                        // Vérification
-                        guard let documents = snapshot?.documents else {
-                                print("⚠️ Aucun document trouvé")
-                                return
-                        }
-                        
-                        // On transforme les documents bruts de Firestore en objets "Event" Swift
-                        self?.events = documents.compactMap { doc -> Event? in
-                                try? doc.data(as: Event.self)
-                        }
+                service.listenToEvents { [weak self] fetchedEvents in
+                        self?.events = fetchedEvents
                 }
         }
         
-        // MARK: - Ajout (Écriture)
-        // Dans EventListViewModel.swift
-        
-        // Changez la signature de la fonction pour accepter 'userId'
+        // MARK: ajout
         func addEvent(title: String, description: String, date: Date, location: String, category: EventCategory, userId: String) {
-                
                 let newEvent = Event(
-                        // Plus de "CurrentUser" en dur ! On utilise le vrai ID reçu
                         userId: userId,
                         title: title,
                         description: description,
@@ -61,13 +40,32 @@ class EventListViewModel {
                         location: location,
                         category: category
                 )
+               
+                service.add(newEvent)
+        }
+        
+        // MARK: suppression
+        func deleteEvent(at offsets: IndexSet) {
+                guard let currentUserId = Auth.auth().currentUser?.uid else { return }
                 
-                do {
-                        // Le reste ne change pas
-                        try dataBase.collection("events").addDocument(from: newEvent)
-                        print("✅ Événement ajouté pour l'user \(userId)")
-                } catch {
-                        print("❌ Erreur : \(error.localizedDescription)")
+                offsets.forEach { index in
+                        let event = events[index]
+                        
+                        /// seul le propriétaire peut supprimer
+                        if event.userId == currentUserId, let eventId = event.id {
+                                service.delete(eventId: eventId)
+                        }
                 }
+        }
+        
+        // MARK: participation
+        func toggleParticipation(event: Event) {
+                guard let eventId = event.id,
+                      let currentUserId = Auth.auth().currentUser?.uid else { return }
+                
+                // on rejoint ou on quitte ?
+                let isJoining = !event.attendees.contains(currentUserId)
+                
+                service.updateParticipation(eventId: eventId, userId: currentUserId, isJoining: isJoining)
         }
 }

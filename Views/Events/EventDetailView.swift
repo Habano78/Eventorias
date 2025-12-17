@@ -6,13 +6,22 @@
 //
 
 import SwiftUI
-import MapKit // <--- Ajout nécessaire pour la vraie carte
+import MapKit
+import FirebaseAuth
+
 
 struct EventDetailView: View {
         
+        //MARK: properties
         let event: Event
-        
         @Environment(\.dismiss) var dismiss
+        @Environment(EventListViewModel.self) var viewModel
+        
+        var isParticipating: Bool {
+                guard let currentUserId = Auth.auth().currentUser?.uid else { return false }
+                return event.attendees.contains(currentUserId)
+        }
+        
         
         //MARK: body
         var body: some View {
@@ -21,12 +30,12 @@ struct EventDetailView: View {
                                 
                                 // Image
                                 Image(event.category.assetName)
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .frame(height: 300)
-                                    .frame(minWidth: 0, maxWidth: .infinity)
-                                    .clipped()
-                                    .clipShape(RoundedRectangle(cornerRadius: 24))
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(height: 300)
+                                        .frame(minWidth: 0, maxWidth: .infinity)
+                                        .clipped()
+                                        .clipShape(RoundedRectangle(cornerRadius: 24))
                                 
                                 // Date/Heure/Avatar
                                 HStack(alignment: .center) {
@@ -60,71 +69,102 @@ struct EventDetailView: View {
                                                 .shadow(radius: 5)
                                 }
                                 
-                                // Description
+                                /// Description
                                 Text(event.description)
                                         .font(.body)
                                         .foregroundStyle(.gray)
                                         .lineSpacing(5)
+                               
+                                /// Compteur de participants
+                                HStack(spacing: 10) {
+                                                    HStack(spacing: 4) {
+                                                        Image(systemName: "person.2.fill")
+                                                            .font(.subheadline)
+                                                        
+                                                        Text("\(event.attendees.count)")
+                                                            .font(.headline)
+                                                            .fontWeight(.bold)
+                                                    }
+                                                    .foregroundStyle(.white)
+                                                    .padding(.horizontal, 10)
+                                                    .padding(.vertical, 8)
+                                                    .background(Color(white: 0.2))
+                                                    .clipShape(Capsule())
+                                                    
+                                                    Text("participant(s)")
+                                                        .font(.subheadline)
+                                                        .foregroundStyle(.gray)
+                                       
+                                        
+                                        Button {
+                                                withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
+                                                        viewModel.toggleParticipation(event: event)
+                                                }
+                                        } label: {
+                                                HStack(spacing: 12) {
+                                                        Image(systemName: isParticipating ? "checkmark.circle.fill" : "ticket.fill")
+                                                                .font(.title3)
+                                                        Text(isParticipating ? "Inscrit(e)" : "Participer")
+                                                                .font(.headline)
+                                                                .fontWeight(.bold)
+                                                }
+                                                .frame(maxWidth: .infinity)
+                                                .frame(height: 35)
+                                                .frame(width: 150, alignment: .init(horizontal: .center, vertical: .center))
+                                                .background(isParticipating ? Color(white: 0.2) : Color.blue)
+                                                .foregroundStyle(.white)
+                                                .clipShape(Capsule())
+                                                .shadow(color: isParticipating ? .clear : .red.opacity(0.4), radius: 10, x: 0, y: 5)
+                                        }
+                                        .padding(.horizontal)
+                                        .padding(.bottom, 10)
+                
+                                                }
                                 
+                                                .padding(.vertical, 5)
                                 Spacer()
                                 
-                                // Adresse + CARTE
+                                // Adresse/Map
                                 HStack (alignment: .top, spacing: 15) {
-                                        VStack(alignment: .leading, spacing: 5) {
-                                                
+                                        
+                                        VStack(alignment: .leading, spacing: 1) {
+                                                /// adresse
                                                 Text(event.location)
                                                         .font(.headline)
-                                                        .foregroundStyle(.gray)
+                                                        .foregroundStyle(.white)
                                                         .fixedSize(horizontal: false, vertical: true)
                                         }
                                         .padding(.top, 8)
-                                        Spacer()
-                                        //.frame(maxWidth: .infinity, alignment: .leading)
+                                        .frame(maxWidth: .infinity, alignment: .leading)
                                         
-                                        //MAP
+                                        ///Map
                                         Map(initialPosition: .region(MKCoordinateRegion(
                                                 center: CLLocationCoordinate2D(latitude: 23.1136, longitude: -82.3666),
                                                 span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
                                         )))
-                                        .frame(width: 140, height: 75)
+                                        .frame(width: 140, height: 80)
                                         .clipShape(RoundedRectangle(cornerRadius: 10))
                                         .disabled(true)
                                 }
-                                
                                 .padding()
-                                
                                 .padding(.bottom, 80)
-                                
                         }
                         .padding()
                 }
                 .background(Color.black.ignoresSafeArea())
                 .navigationBarBackButtonHidden(true)
-                .toolbar {
-                        ToolbarItem(placement: .topBarLeading) {
-                                Button { dismiss() } label: {
-                                        Image(systemName: "arrow.left")
-                                                .foregroundStyle(.white)
-                                                .fontWeight(.bold)
-                                }
-                        }
-                        ToolbarItem(placement: .principal) {
-                                Text(event.title)
-                                        .font(.headline)
-                                        .foregroundStyle(.white)
-                        }
-                }
         }
 }
-
 //MARK: previw
 #Preview {
         EventDetailView(event: Event(
                 userId: "1",
                 title: "Test Event",
-                description: "No billion-dollar retraining. No complex fine-tuning. Just eight words that unlock creativity we thought was lost forever.​The paper comes from Stanford, Northeastern, and West Virginia University. The technique is called Verbalized Sampling. And it’s so stupidly simple that when I first tried it, I actually laughed out loud.",
+                description: "Description de test pour la preview...",
                 date: Date(),
-                location: "123 Rue de l'Art, Quartier des Galeries, Paris, 75003, France",
+                location: "Paris",
                 category: .charity
         ))
+        .environment(EventListViewModel())
 }
+

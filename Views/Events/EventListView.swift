@@ -10,80 +10,85 @@ import SwiftUI
 
 struct EventListView: View {
         
-        var authViewModel: AuthViewModel
+        @Environment(EventListViewModel.self) var viewModel
         
-        @State private var viewModel = EventListViewModel()
         @State private var searchText = ""
-        @State private var showCreateSheet = false
+        @State private var showAddEventSheet = false
         
-        //MARK: body
+        ///Logique de filtrage
+        var filteredEvents: [Event] {
+                if searchText.isEmpty {
+                        return viewModel.events
+                } else {
+                        return viewModel.events.filter { event in
+                                event.title.localizedCaseInsensitiveContains(searchText)
+                        }
+                }
+        }
+        
         var body: some View {
                 NavigationStack {
-                        
-                        ZStack(alignment: .bottomTrailing) {
-                                
-                                //  FOND NOIR
-                                Color.black.ignoresSafeArea()
-                                
-                                VStack(spacing: 16) {
-                                        
-                                        HStack {
-                                                HStack {
-                                                        Image(systemName: "magnifyingglass")
-                                                                .foregroundStyle(.gray)
-                                                        TextField("Search", text: $searchText)
-                                                }
-                                                .padding(10)
-                                                .background(Color(white: 0.2))
-                                                .cornerRadius(20)
+                        Group {
+                                if filteredEvents.isEmpty {
+                                        VStack(spacing: 20) {
+                                                Image(systemName: searchText.isEmpty ? "calendar.badge.plus" : "magnifyingglass")
+                                                        .font(.system(size: 50))
+                                                        .foregroundStyle(.gray)
+                                               
+                                                Text(searchText.isEmpty ? "Aucun événement" : "Aucun résultat")
+                                                        .font(.headline)
+                                                        .foregroundStyle(.gray)
                                                 
-                                                // Bouton Sort
-                                                Button {} label: {
-                                                        HStack {
-                                                                Image(systemName: "arrow.up.arrow.down")
-                                                                Text("Sorting")
-                                                        }
-                                                        .font(.caption)
-                                                        .padding(10)
-                                                        .background(Color(white: 0.2))
-                                                        .cornerRadius(20)
-                                                        .foregroundStyle(.white)
+                                                if searchText.isEmpty {
+                                                        Text("Cliquez sur + pour créer le premier !")
+                                                                .font(.caption)
+                                                                .foregroundStyle(.secondary)
                                                 }
                                         }
-                                        .padding(.horizontal)
-                                        
-                                        // 2. La Liste
-                                        ScrollView {
-                                                LazyVStack(spacing: 12) {
-                                                        ForEach(viewModel.events) { event in
+                                } else {
+                                        // La Liste
+                                        List {
+                                                ForEach(filteredEvents) { event in
+                                                        
+                                                        ZStack {
                                                                 NavigationLink(destination: EventDetailView(event: event)) {
-                                                                        EventRowView(event: event)
+                                                                        EmptyView()
                                                                 }
+                                                                .opacity(0)
+                                                                
+                                                                EventRowView(event: event)
                                                         }
+                                                        .listRowSeparator(.hidden)
+                                                        .listRowInsets(EdgeInsets(top: 8, leading: 1, bottom: 1, trailing: 1))
                                                 }
-                                                .padding()
+                                                .onDelete(perform: viewModel.deleteEvent)
                                         }
+                                        .listStyle(.plain)
                                 }
-                                
-                                // Le Bouton Flottant (+)
-                                Button {
-                                        showCreateSheet = true
-                                } label: {
-                                        Image("Button - Add new event")
-                                }
-                                .padding()
-                                .offset(y: -10)
-                        }
-                        .sheet(isPresented: $showCreateSheet) {
-                            AddEventView(viewModel: viewModel)
                         }
                         .navigationTitle("")
+                        // Barre de recherche
+                        .searchable(text: $searchText, prompt: "Rechercher un événement...")
+                        .toolbar {
+                                ToolbarItem(placement: .topBarTrailing) {
+                                        Button {
+                                                showAddEventSheet.toggle()
+                                        } label: {
+                                                Image(systemName: "plus.circle.fill")
+                                                        .font(.title2)
+                                                        .foregroundStyle(Color.red)
+                                        }
+                                }
+                        }
+                        .sheet(isPresented: $showAddEventSheet) {
+                                AddEventView(viewModel: viewModel)
+                        }
                 }
                 .preferredColorScheme(.dark)
         }
 }
 
-//MARK: preview
 #Preview {
-        EventListView(authViewModel: AuthViewModel())
+        EventListView()
+                .environment(EventListViewModel())
 }

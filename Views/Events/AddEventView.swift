@@ -45,7 +45,6 @@ struct AddEventView: View {
                                 
                                 /// Section 3 : Description
                                 Section(header: Text("Description")) {
-                                        // TextEditor permet d'écrire plusieurs lignes
                                         TextEditor(text: $description)
                                                 .frame(height: 100)
                                 }

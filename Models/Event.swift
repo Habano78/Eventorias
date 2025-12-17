@@ -18,9 +18,10 @@ struct Event: Identifiable, Codable {
         let date: Date
         let location: String
         let category: EventCategory
+        var attendees: [String] = []
         
         //Init
-        init(id: String? = nil, userId: String, title: String, description: String, date: Date, location: String, category: EventCategory) {
+        init(id: String? = nil, userId: String, title: String, description: String, date: Date, location: String, category: EventCategory, attendees: [String] = []) {
                 self.id = id
                 self.userId = userId
                 self.title = title
@@ -28,5 +29,6 @@ struct Event: Identifiable, Codable {
                 self.date = date
                 self.location = location
                 self.category = category
+                self.attendees = attendees
         }
 }

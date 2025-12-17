@@ -20,6 +20,7 @@ struct EventoriasApp: App {
                         RootView(authViewModel: container.authViewModel)
                                 .environment(container)
                                 .environment(container.eventListViewModel)
+                                .preferredColorScheme(.dark)
                 }
         }
 }

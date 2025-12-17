@@ -9,8 +9,10 @@ import SwiftUI
 import FirebaseAuth
 
 struct ProfileView: View {
+        
         var authViewModel: AuthViewModel
         
+        //MARK: body
         var body: some View {
                 NavigationStack {
                         VStack(spacing: 20) {
