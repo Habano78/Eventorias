@@ -8,7 +8,7 @@
 import Foundation
 import FirebaseFirestore
 
-struct Event: Identifiable, Codable {
+struct Event: Identifiable, Codable, Sendable {
         
         @DocumentID var id: String? /// ID  géré automatiquement par Firestore
         
@@ -19,9 +19,13 @@ struct Event: Identifiable, Codable {
         let location: String
         let category: EventCategory
         var attendees: [String] = []
+        var imageURL: String? = nil
+        
+        var latitude: Double
+        var longitude: Double
         
         //Init
-        init(id: String? = nil, userId: String, title: String, description: String, date: Date, location: String, category: EventCategory, attendees: [String] = []) {
+        init(id: String? = nil, userId: String, title: String, description: String, date: Date, location: String, category: EventCategory, attendees: [String] = [], imageURL: String? = nil, latitude: Double, longitude: Double) {
                 self.id = id
                 self.userId = userId
                 self.title = title
@@ -30,5 +34,8 @@ struct Event: Identifiable, Codable {
                 self.location = location
                 self.category = category
                 self.attendees = attendees
+                self.imageURL = imageURL
+                self.latitude = latitude
+                self.longitude = longitude
         }
 }

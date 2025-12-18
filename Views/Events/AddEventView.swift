@@ -4,23 +4,30 @@
 //
 //  Created by Perez William on 15/12/2025.
 //
+//
 
 import SwiftUI
 import FirebaseAuth
+import PhotosUI
 
 struct AddEventView: View {
         
-        var viewModel: EventListViewModel
-        
+        //MARK: properties
+        @Environment(EventListViewModel.self) var eventListViewModel
         @Environment(\.dismiss) var dismiss
         
-        
-        // Les champs du formulaire
+        // Champs du formulaire
         @State private var title = ""
         @State private var description = ""
         @State private var location = ""
         @State private var date = Date()
         @State private var selectedCategory: EventCategory = .music
+        
+        // Gestion Image
+        @State private var selectedItem: PhotosPickerItem? = nil
+        @State private var selectedImageData: Data? = nil
+        @State private var selectedImage: UIImage? = nil
+        
         
         //MARK: body
         var body: some View {
@@ -31,9 +38,9 @@ struct AddEventView: View {
                                         TextField("Titre de l'événement", text: $title)
                                         
                                         Picker("Catégorie", selection: $selectedCategory) {
-                                            ForEach(EventCategory.allCases) { category in
-                                                Text(category.rawValue).tag(category)
-                                            }
+                                                ForEach(EventCategory.allCases) { category in
+                                                        Text(category.rawValue).tag(category)
+                                                }
                                         }
                                 }
                                 
@@ -48,23 +55,56 @@ struct AddEventView: View {
                                         TextEditor(text: $description)
                                                 .frame(height: 100)
                                 }
+                                
+                                /// Section 4 : Photo
+                                Section(header: Text("Photo de l'événement")) {
+                                        HStack {
+                                                /// Aperçu de l'image sélectionnée
+                                                if let image = selectedImage {
+                                                        Image(uiImage: image)
+                                                                .resizable()
+                                                                .scaledToFill()
+                                                                .frame(width: 80, height: 80)
+                                                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                                } else {
+                                                        /// Placeholder
+                                                        RoundedRectangle(cornerRadius: 10)
+                                                                .fill(Color.gray.opacity(0.2))
+                                                                .frame(width: 80, height: 80)
+                                                                .overlay {
+                                                                        Image(systemName: "photo")
+                                                                                .foregroundStyle(.gray)
+                                                                }
+                                                }
+                                                
+                                                Spacer()
+                                                
+                                                // PhotosPicker
+                                                PhotosPicker(selection: $selectedItem, matching: .images, photoLibrary: .shared()) {
+                                                        HStack {
+                                                                Image(systemName: "photo.badge.plus")
+                                                                Text("Choisir une photo")
+                                                        }
+                                                        .foregroundStyle(.blue)
+                                                }
+                                        }
+                                        .padding(.vertical, 5)
+                                }
                         }
-                        HStack{ // A ACTIVAR
-                                Image("Button - Camera")
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: 50, height: 50)
-                                        .clipShape(Rectangle())
-                                Image("Button - Attach photo")
-                                        .resizable()
-                                        .scaledToFill()
-                                        .frame(width: 50, height: 50)
-                                        .clipShape(Rectangle())
-                        }
-                        .padding(70)
-                        
                         .navigationTitle("Nouvel Événement")
                         .navigationBarTitleDisplayMode(.inline)
+                        
+                        .onChange(of: selectedItem) { oldValue, newItem in
+                                Task {
+                                        if let data = try? await newItem?.loadTransferable(type: Data.self),
+                                           let uiImage = UIImage(data: data) {
+                                                
+                                                self.selectedImage = uiImage
+                                                self.selectedImageData = uiImage.jpegData(compressionQuality: 0.5)
+                                        }
+                                }
+                        }
+                        
                         .toolbar {
                                 // Bouton Annuler
                                 ToolbarItem(placement: .cancellationAction) {
@@ -78,14 +118,17 @@ struct AddEventView: View {
                                         
                                         Button("Créer") {
                                                 if let currentUserId = Auth.auth().currentUser?.uid {
-                                                        viewModel.addEvent(
+                                                        
+                                                        eventListViewModel.addEvent(
                                                                 title: title,
                                                                 description: description,
                                                                 date: date,
                                                                 location: location,
                                                                 category: selectedCategory,
-                                                                userId: currentUserId
+                                                                userId: currentUserId,
+                                                                imageData: selectedImageData
                                                         )
+                                                        
                                                         dismiss()
                                                 } else {
                                                         print("Erreur : Personne n'est connecté")
@@ -100,5 +143,5 @@ struct AddEventView: View {
 }
 
 #Preview {
-        AddEventView(viewModel: EventListViewModel())
+        AddEventView()
 }

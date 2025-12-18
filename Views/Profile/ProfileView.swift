@@ -6,109 +6,138 @@
 //
 
 import SwiftUI
+import PhotosUI
 import FirebaseAuth
 
 struct ProfileView: View {
         
-        //MARK: properties
-        @Environment(EventListViewModel.self) var eventViewModel
         @Environment(AuthViewModel.self) var authViewModel
+        
+        // États locaux pour l'édition
+        @State private var name: String = ""
+        @State private var isNotificationsEnabled: Bool = false
+        @State private var selectedItem: PhotosPickerItem? = nil
+        @State private var selectedImage: UIImage? = nil
+        
         
         //MARK: body
         var body: some View {
                 NavigationStack {
-                        VStack(spacing: 20) {
+                        ZStack {
+                                Color.black.ignoresSafeArea()
                                 
-                                // Avatar et Infos
-                                VStack(spacing: 15) {
-                                        
-                                        Image("Avatar (4)")
-                                                .resizable()
-                                                .aspectRatio(contentMode: .fill)
-                                                .frame(width: 100, height: 100)
-                                                .clipShape(Circle())
-                                                .overlay(
-                                                        Circle().stroke(Color.red, lineWidth: 3)
-                                                )
-                                                .shadow(radius: 10)
-                                        
-                                        // Infos Texte
-                                        VStack(spacing: 5) {
-                                                Text("Alejandro Sans")
-                                                        .font(.title2)
-                                                        .fontWeight(.bold)
-                                                        .foregroundStyle(.white)
-                                                
-                                                Text(authViewModel.userSession?.email ?? "email@exemple.com")
-                                                        .font(.subheadline)
-                                                        .foregroundStyle(.gray)
-                                        }
-                                }
-                                .padding(.top, 30)
-                                
-                                Divider()
-                                        .background(Color.gray.opacity(0.5))
-                                        .padding(.vertical)
-                                
-                                // Menu / Options
-                                List {
-                                        Section {
-                                                NavigationLink {
-                                                        Text("Écran d'édition à venir")
-                                                } label: {
-                                                        Label("Modifier le profil", systemImage: "pencil")
-                                                }
-                                                
-                                                NavigationLink(destination: MyEventsView()) {
+                                if authViewModel.isLoading {
+                                        ProgressView("Sauvegarde...")
+                                                .tint(.white)
+                                                .foregroundStyle(.white)
+                                } else {
+                                        Form {
+                                                // SECTION 1: AVATAR
+                                                Section {
                                                         HStack {
-                                                                Image(systemName: "ticket.fill")
-                                                                        .foregroundStyle(.white)
-                                                                Text("Mes Evenements")
-                                                                        .foregroundStyle(.white)
                                                                 Spacer()
-                                                                Image(systemName: "chevron.right")
+                                                                VStack {
+                                                                        // Affichage de l'image (Locale ou Distante ou Placeholder)
+                                                                        if let selectedImage = selectedImage {
+                                                                                Image(uiImage: selectedImage)
+                                                                                        .resizable()
+                                                                                        .scaledToFill()
+                                                                                        .frame(width: 100, height: 100)
+                                                                                        .clipShape(Circle())
+                                                                        } else if let urlString = authViewModel.currentUser?.profileImageURL, let url = URL(string: urlString) {
+                                                                                AsyncImage(url: url) { image in
+                                                                                        image.resizable().scaledToFill()
+                                                                                } placeholder: {
+                                                                                        ProgressView()
+                                                                                }
+                                                                                .frame(width: 100, height: 100)
+                                                                                .clipShape(Circle())
+                                                                        } else {
+                                                                                Image(systemName: "person.circle.fill")
+                                                                                        .resizable()
+                                                                                        .foregroundStyle(.gray)
+                                                                                        .frame(width: 100, height: 100)
+                                                                        }
+                                                                        
+                                                                        // Bouton Changement Photo
+                                                                        PhotosPicker(selection: $selectedItem, matching: .images) {
+                                                                                Text("Modifier la photo")
+                                                                                        .font(.footnote)
+                                                                                        .foregroundStyle(.blue)
+                                                                        }
+                                                                }
+                                                                Spacer()
+                                                        }
+                                                }
+                                                .listRowBackground(Color.clear)
+                                                
+                                                // SECTION INFOS
+                                                Section("Informations Personnelles") {
+                                                        TextField("Nom complet", text: $name)
+                                                        
+                                                        HStack {
+                                                                Text("Email")
+                                                                Spacer()
+                                                                Text(authViewModel.userSession?.email ?? "")
                                                                         .foregroundStyle(.gray)
                                                         }
-                                                        .padding()
-                                                        .background(Color(white: 0.1))
-                                                        .cornerRadius(10)
                                                 }
                                                 
-                                                NavigationLink {
-                                                        Text("Préférences")
-                                                } label: {
-                                                        Label("Paramètres", systemImage: "gear")
+                                                // Switch notifications
+                                                Section("Préférences") {
+                                                        Toggle("Notifications", isOn: $isNotificationsEnabled)
+                                                                .tint(.green) // Couleur active
                                                 }
-                                        } header: {
-                                                Text("Compte")
-                                        }
-                                        .listRowBackground(Color(white: 0.1))
-                                        
-                                        // Section Déconnexion
-                                        Section {
-                                                Button {
-                                                        authViewModel.signOut()
-                                                } label: {
-                                                        Label("Se déconnecter", systemImage: "rectangle.portrait.and.arrow.right")
-                                                                .foregroundStyle(.red)
+                                                
+                                                // ACTIONS
+                                                Section {
+                                                        Button {
+                                                                authViewModel.updateProfile(
+                                                                        name: name,
+                                                                        isNotifEnabled: isNotificationsEnabled,
+                                                                        image: selectedImage
+                                                                )
+                                                        } label: {
+                                                                Text("Enregistrer les modifications")
+                                                                        .frame(maxWidth: .infinity)
+                                                                        .foregroundStyle(.white)
+                                                        }
+                                                        .listRowBackground(Color.blue)
+                                                        
+                                                        Button(role: .destructive) {
+                                                                authViewModel.signOut()
+                                                        } label: {
+                                                                Text("Se déconnecter")
+                                                                        .frame(maxWidth: .infinity)
+                                                        }
                                                 }
                                         }
-                                        .listRowBackground(Color(white: 0.1))
+                                        .scrollContentBackground(.hidden)
                                 }
-                                .scrollContentBackground(.hidden)
                         }
-                        .background(Color.black.ignoresSafeArea())
-                        .navigationTitle("User Profile")
-                        .navigationBarTitleDisplayMode(.inline)
+                        .navigationTitle("Mon Profil")
+                        .onAppear {
+                                /// Charger les données existantes dans les champs
+                                if let user = authViewModel.currentUser {
+                                        self.name = user.name ?? ""
+                                        self.isNotificationsEnabled = user.isNotificationsEnabled
+                                }
+                        }
+                        /// Gestion de la sélection photo
+                        .onChange(of: selectedItem) { _, newItem in
+                                Task {
+                                        if let data = try? await newItem?.loadTransferable(type: Data.self),
+                                           let uiImage = UIImage(data: data) {
+                                                self.selectedImage = uiImage
+                                        }
+                                }
+                        }
                 }
+                .preferredColorScheme(.dark)
         }
 }
 
 #Preview {
-        
-        let container = DIContainer()
-        
         ProfileView()
-                .environment(container.authViewModel)
-                .environment(container.eventListViewModel)
+                .environment(AuthViewModel())
 }

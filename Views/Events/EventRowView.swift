@@ -64,7 +64,7 @@ struct EventRowView: View {
 #Preview {
         ZStack {
                 Color.black.ignoresSafeArea()
-                EventRowView(event: Event(userId: "1", title: "Music Festival", description: "Test", date: Date(), location: "Paris", category: .music))
+                EventRowView(event: Event(userId: "1", title: "Music Festival", description: "Test", date: Date(), location: "Paris", category: .music, latitude: 48.8566, longitude: 2.3522))
                         .padding()
         }
 }

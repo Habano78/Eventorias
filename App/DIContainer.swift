@@ -23,7 +23,7 @@ class DIContainer {
             FirebaseApp.configure()
         }
         self.eventService = Service()
-        self.eventListViewModel = EventListViewModel(service: eventService)
+        self.eventListViewModel = EventListViewModel()
         self.authViewModel = AuthViewModel()
     }
 }

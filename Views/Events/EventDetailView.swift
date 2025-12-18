@@ -5,37 +5,69 @@
 //  Created by Perez William on 15/12/2025.
 //
 
+//
+//  EventDetailView.swift
+//  Eventorias
+//
+//  Created by Perez William on 15/12/2025.
+//
+
 import SwiftUI
 import MapKit
 import FirebaseAuth
 
-
 struct EventDetailView: View {
         
-        //MARK: properties
+        // MARK: properties
         let event: Event
         @Environment(\.dismiss) var dismiss
-        @Environment(EventListViewModel.self) var viewModel
+        @Environment(EventListViewModel.self) var eventListViewModel
         
         var isParticipating: Bool {
                 guard let currentUserId = Auth.auth().currentUser?.uid else { return false }
                 return event.attendees.contains(currentUserId)
         }
         
-        
-        //MARK: body
+        // MARK: body
         var body: some View {
                 ScrollView {
                         VStack(alignment: .leading, spacing: 20) {
                                 
-                                // Image
-                                Image(event.category.assetName)
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                        .frame(height: 300)
-                                        .frame(minWidth: 0, maxWidth: .infinity)
-                                        .clipped()
-                                        .clipShape(RoundedRectangle(cornerRadius: 24))
+                                // GESTION DE L'IMAGE
+                                Group {
+                                        if let imageURL = event.imageURL, let url = URL(string: imageURL) {
+                                        
+                                                AsyncImage(url: url) { phase in
+                                                        switch phase {
+                                                        case .empty:
+                                                                ZStack {
+                                                                        Color(white: 0.1)
+                                                                        ProgressView()
+                                                                }
+                                                        case .success(let image):
+                                                                image
+                                                                        .resizable()
+                                                                        .aspectRatio(contentMode: .fill)
+                                                        case .failure:
+                                
+                                                                Image(event.category.assetName)
+                                                                        .resizable()
+                                                                        .aspectRatio(contentMode: .fill)
+                                                        @unknown default:
+                                                                EmptyView()
+                                                        }
+                                                }
+                                        } else {
+                                                
+                                                Image(event.category.assetName)
+                                                        .resizable()
+                                                        .aspectRatio(contentMode: .fill)
+                                        }
+                                }
+                                .frame(height: 300)
+                                .frame(minWidth: 0, maxWidth: .infinity)
+                                .clipped()
+                                .clipShape(RoundedRectangle(cornerRadius: 24))
                                 
                                 // Date/Heure/Avatar
                                 HStack(alignment: .center) {
@@ -74,61 +106,63 @@ struct EventDetailView: View {
                                         .font(.body)
                                         .foregroundStyle(.gray)
                                         .lineSpacing(5)
-                               
+                                
                                 /// Compteur de participants
-                                HStack(spacing: 10) {
-                                                    HStack(spacing: 4) {
-                                                        Image(systemName: "person.2.fill")
-                                                            .font(.subheadline)
-                                                        
-                                                        Text("\(event.attendees.count)")
-                                                            .font(.headline)
-                                                            .fontWeight(.bold)
-                                                    }
-                                                    .foregroundStyle(.white)
-                                                    .padding(.horizontal, 10)
-                                                    .padding(.vertical, 8)
-                                                    .background(Color(white: 0.2))
-                                                    .clipShape(Capsule())
-                                                    
-                                                    Text("participant(s)")
-                                                        .font(.subheadline)
-                                                        .foregroundStyle(.gray)
-                                       
+                                HStack(spacing: 0) {
                                         
+                                        HStack(spacing: 4) {
+                                                Image(systemName: "person.2.fill")
+                                                        .font(.subheadline)
+                                                Text("\(event.attendees.count)")
+                                                        .font(.headline)
+                                                        .fontWeight(.bold)
+                                        }
+                                        .foregroundStyle(.white)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 8)
+                                        .background(Color(white: 0.2))
+                                        .clipShape(Capsule())
+                                        
+                                        Text(" participants")
+                                                                .font(.subheadline)
+                                                                .foregroundStyle(.gray)
+                                                                .padding(.leading, 8)
+                                        
+                                        Spacer()
+                                        
+                                        // Bouton participer
                                         Button {
                                                 withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
-                                                        viewModel.toggleParticipation(event: event)
+                                                        eventListViewModel.toggleParticipation(event: event)
                                                 }
                                         } label: {
-                                                HStack(spacing: 12) {
+                                                HStack(spacing: 6) {
                                                         Image(systemName: isParticipating ? "checkmark.circle.fill" : "ticket.fill")
                                                                 .font(.title3)
                                                         Text(isParticipating ? "Inscrit(e)" : "Participer")
                                                                 .font(.headline)
                                                                 .fontWeight(.bold)
                                                 }
-                                                .frame(maxWidth: .infinity)
-                                                .frame(height: 35)
-                                                .frame(width: 150, alignment: .init(horizontal: .center, vertical: .center))
-                                                .background(isParticipating ? Color(white: 0.2) : Color.blue)
+                                                .font(.subheadline)
+                                                .frame(width: 135, height: 40)
+                                                .background(isParticipating ? Color(white: 0.2) : Color.blue.opacity(0.3))
                                                 .foregroundStyle(.white)
                                                 .clipShape(Capsule())
                                                 .shadow(color: isParticipating ? .clear : .red.opacity(0.4), radius: 10, x: 0, y: 5)
                                         }
-                                        .padding(.horizontal)
-                                        .padding(.bottom, 10)
-                
-                                                }
+                                        .padding(.vertical, 5)
+                                        
+                                }
                                 
-                                                .padding(.vertical, 5)
+                                .padding(.vertical, 5)
+                                
                                 Spacer()
                                 
                                 // Adresse/Map
                                 HStack (alignment: .top, spacing: 15) {
                                         
                                         VStack(alignment: .leading, spacing: 1) {
-                                                /// adresse
+                                                // Adresse
                                                 Text(event.location)
                                                         .font(.headline)
                                                         .foregroundStyle(.white)
@@ -137,34 +171,38 @@ struct EventDetailView: View {
                                         .padding(.top, 8)
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         
-                                        ///Map
+                                        // Map
                                         Map(initialPosition: .region(MKCoordinateRegion(
-                                                center: CLLocationCoordinate2D(latitude: 23.1136, longitude: -82.3666),
+                                                center: CLLocationCoordinate2D(latitude: 48.8566, longitude: 2.3522),
                                                 span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
                                         )))
                                         .frame(width: 140, height: 80)
                                         .clipShape(RoundedRectangle(cornerRadius: 10))
                                         .disabled(true)
                                 }
-                                .padding()
                                 .padding(.bottom, 80)
                         }
                         .padding()
                 }
                 .background(Color.black.ignoresSafeArea())
-                .navigationBarBackButtonHidden(true)
+                .navigationBarBackButtonHidden(false)
+                .navigationTitle(event.title)
+                .navigationBarTitleDisplayMode(.inline)
         }
 }
-//MARK: previw
+
+// MARK: preview
 #Preview {
         EventDetailView(event: Event(
                 userId: "1",
                 title: "Test Event",
-                description: "Description de test pour la preview...",
+                description: "Description de test...",
                 date: Date(),
                 location: "Paris",
-                category: .charity
+                category: .charity,
+                imageURL: nil,
+                latitude: 48.8566,
+                longitude: 2.3522
         ))
         .environment(EventListViewModel())
 }
-

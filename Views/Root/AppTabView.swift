@@ -9,10 +9,6 @@ import SwiftUI
 
 struct AppTabView: View {
         
-        //MARK: dependencies
-        @Environment(AuthViewModel.self) var authViewModel
-        
-        //MARK: body
         var body: some View {
                 
                 TabView {
@@ -31,6 +27,9 @@ struct AppTabView: View {
 }
 
 #Preview {
+        let container = DIContainer()
+        
         AppTabView()
-                .environment(AuthViewModel())
+                .environment(container.authViewModel)
+                .environment(container.eventListViewModel)
 }

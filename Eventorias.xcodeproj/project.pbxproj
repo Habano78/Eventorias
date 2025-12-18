@@ -20,6 +20,7 @@
 		2285A24E2EF0438F000D512A /* EventCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A24D2EF0438F000D512A /* EventCategory.swift */; };
 		2285A2622EF16DAD000D512A /* DIContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A2612EF16DAD000D512A /* DIContainer.swift */; };
 		2285A27D2EF1D943000D512A /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A27C2EF1D943000D512A /* Service.swift */; };
+		2285A29A2EF32F3B000D512A /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 2285A2992EF32F3B000D512A /* FirebaseStorage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -95,6 +96,7 @@
 			files = (
 				2285A2442EF0386B000D512A /* FirebaseAuth in Frameworks */,
 				2285A2462EF0386B000D512A /* FirebaseFirestore in Frameworks */,
+				2285A29A2EF32F3B000D512A /* FirebaseStorage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -120,11 +122,10 @@
 			children = (
 				2285A23F2EF034CC000D512A /* GoogleService-Info.plist */,
 				2285A22D2EF00BF2000D512A /* App */,
+				2285A22F2EF00C05000D512A /* Services */,
 				2285A2302EF00C0E000D512A /* Models */,
 				2285A23C2EF02463000D512A /* ViewModels */,
 				2285A23B2EF0245A000D512A /* Views */,
-				2285A22E2EF00BFD000D512A /* Core */,
-				2285A22F2EF00C05000D512A /* Services */,
 				2285A2322EF00C29000D512A /* Resources */,
 				2285A2132EF00B47000D512A /* EventoriasTests */,
 				2285A21D2EF00B47000D512A /* EventoriasUITests */,
@@ -147,21 +148,14 @@
 			children = (
 				2285A2062EF00B45000D512A /* EventoriasApp.swift */,
 				2285A2612EF16DAD000D512A /* DIContainer.swift */,
-				2285A27C2EF1D943000D512A /* Service.swift */,
 			);
 			path = App;
-			sourceTree = "<group>";
-		};
-		2285A22E2EF00BFD000D512A /* Core */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Core;
 			sourceTree = "<group>";
 		};
 		2285A22F2EF00C05000D512A /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				2285A27C2EF1D943000D512A /* Service.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -229,6 +223,7 @@
 			packageProductDependencies = (
 				2285A2432EF0386B000D512A /* FirebaseAuth */,
 				2285A2452EF0386B000D512A /* FirebaseFirestore */,
+				2285A2992EF32F3B000D512A /* FirebaseStorage */,
 			);
 			productName = Eventorias;
 			productReference = 2285A2032EF00B45000D512A /* Eventorias.app */;
@@ -731,6 +726,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2285A2422EF0386B000D512A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
+		};
+		2285A2992EF32F3B000D512A /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2285A2422EF0386B000D512A /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
