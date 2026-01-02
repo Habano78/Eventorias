@@ -8,132 +8,114 @@
 import Foundation
 import FirebaseFirestore
 import FirebaseStorage
-import FirebaseAuth // INDISPENSABLE pour currentUserId
+import FirebaseAuth
 
-class Service {
+final class Service: Sendable {
         
-        private let dataBase = Firestore.firestore()
+        static let shared = Service()
+        
+        private lazy var dataBase = Firestore.firestore()
+        private lazy var storage = Storage.storage()
         
         var currentUserId: String? {
                 return Auth.auth().currentUser?.uid
         }
         
-        // MARK: GESTION ÉVÉNEMENTS
-        func fetchEvents(completion: @escaping ([Event]) -> Void) {
-                dataBase.collection("events").order(by: "date", descending: false).getDocuments { snapshot, error in
-                        guard let documents = snapshot?.documents, error == nil else {
-                                print("Erreur Fetch: \(error?.localizedDescription ?? "Inconnue")")
-                                completion([])
-                                return
-                        }
-                        
-                        let events = documents.compactMap { doc -> Event? in
-                                try? doc.data(as: Event.self)
-                        }
-                        completion(events)
-                }
-        }
+        // MARK: - GESTION ÉVÉNEMENTS (LECTURE)
         
-        func addEvent(event: Event, completion: @escaping (Bool) -> Void) {
-                do {
-                        try dataBase.collection("events").addDocument(from: event)
-                        completion(true)
-                } catch {
-                        print("Erreur ajout: \(error.localizedDescription)")
-                        completion(false)
-                }
-        }
-        
-        // ✅ CORRECTION 3 : La fonction updateEvent manquante
-        func updateEvent(event: Event, completion: @escaping (Bool) -> Void) {
-                guard let eventId = event.id else { return }
+        func fetchEvents() async throws -> [Event] {
+                // 1. Appel asynchrone
+                let snapshot = try await dataBase.collection("events")
+                        .order(by: "date", descending: false)
+                        .getDocuments()
                 
-                do {
-                        try dataBase.collection("events").document(eventId).setData(from: event, merge: true)
-                        completion(true)
-                } catch {
-                        print("Erreur update event: \(error.localizedDescription)")
-                        completion(false)
+                let events = snapshot.documents.compactMap { doc -> Event? in
+                        guard let dto = try? doc.data(as: EventDTO.self) else { return nil }
+                        return Event(from: dto)
                 }
+                
+                return events
         }
         
-        func deleteEvent(eventId: String, completion: @escaping (Bool) -> Void) {
-                dataBase.collection("events").document(eventId).delete { error in
-                        completion(error == nil)
-                }
+        // MARK: GESTION ÉVÉNEMENTS (ÉCRITURE)
+
+        func addEvent(_ event: Event) async throws {
+                try dataBase.collection("events")
+                        .document(event.id)
+                        .setData(from: event.asDTO)
         }
         
-        // MARK: - PARTICIPATION
+        func updateEvent(_ event: Event) async throws {
+                try dataBase.collection("events")
+                        .document(event.id)
+                        .setData(from: event.asDTO, merge: true)
+        }
         
-        func updateParticipation(eventId: String, userId: String, isJoining: Bool, completion: @escaping (Bool) -> Void) {
+        func deleteEvent(eventId: String) async throws {
+                try await dataBase.collection("events").document(eventId).delete()
+        }
+        
+        //MARK: Modifer
+        func updateEvent(event: Event, title: String, description: String, date: Date, location: String, category: EventCategory, newImageData: Data?) async throws {
+            
+            var data: [String: Any] = [
+                "title": title,
+                "description": description,
+                "date": Timestamp(date: date),
+                "location": location,
+                "category": category.rawValue
+            ]
+            
+            if let imageData = newImageData {
+                let newImageURL = try await uploadImage(data: imageData)
+                data["imageURL"] = newImageURL
+            }
+            
+            try await Firestore.firestore().collection("events").document(event.id).updateData(data)
+        }
+        
+        // MARK: PARTICIPATION
+        func updateParticipation(eventId: String, userId: String, isJoining: Bool) async throws {
                 let eventRef = dataBase.collection("events").document(eventId)
                 
                 let data: [String: Any] = isJoining
                 ? ["attendees": FieldValue.arrayUnion([userId])]
                 : ["attendees": FieldValue.arrayRemove([userId])]
                 
-                eventRef.updateData(data) { error in
-                        completion(error == nil)
-                }
+                try await eventRef.updateData(data)
         }
         
-        // MARK: - STORAGE (IMAGES)
-        
-        func uploadImage(data: Data, completion: @escaping (String?) -> Void) {
-                let storageRef = Storage.storage().reference()
+        // MARK: STORAGE (IMAGES)
+        func uploadImage(data: Data) async throws -> String {
                 let path = "events_images/\(UUID().uuidString).jpg"
-                let fileRef = storageRef.child(path)
+                let fileRef = storage.reference().child(path)
+              
+                _ = try await fileRef.putDataAsync(data)
                 
-                fileRef.putData(data, metadata: nil) { metadata, error in
-                        if let error = error {
-                                print("Erreur upload: \(error.localizedDescription)")
-                                completion(nil)
-                                return
-                        }
-                        
-                        fileRef.downloadURL { url, error in
-                                if let error = error {
-                                        print("Erreur URL: \(error.localizedDescription)")
-                                        completion(nil)
-                                        return
-                                }
-                                completion(url?.absoluteString)
-                        }
-                }
+                let url = try await fileRef.downloadURL()
+                return url.absoluteString
         }
         
-        // MARK: - GESTION USER
-        
-        func saveUser(_ user: User, completion: @escaping (Bool) -> Void) {
-                do {
-                        try dataBase.collection("users").document(user.fireBaseUserId).setData(from: user, merge: true)
-                        completion(true)
-                } catch {
-                        print("Erreur sauvegarde user: \(error.localizedDescription)")
-                        completion(false)
-                }
+        // MARK: GESTION USer
+        func saveUser(_ user: User) async throws {
+                try dataBase.collection("users")
+                        .document(user.fireBaseUserId)
+                        .setData(from: user, merge: true)
         }
         
-        func fetchUser(userId: String, completion: @escaping (User?) -> Void) {
-                dataBase.collection("users").document(userId).getDocument { snapshot, error in
-                        
-                        guard let snapshot = snapshot,
-                              snapshot.exists,
-                              let data = snapshot.data() else {
-                                completion(nil)
-                                return
-                        }
-                        
-                        /// On construit l'objet User pour éviter l'erreur "Decodable isolated context"
-                        let user = User(
-                                fireBaseUserId: userId,
-                                email: data["email"] as? String ?? "",
-                                name: data["name"] as? String,
-                                profileImageURL: data["profileImageURL"] as? String,
-                                isNotificationsEnabled: data["isNotificationsEnabled"] as? Bool ?? false
-                        )
-                        
-                        completion(user)
+        func fetchUser(userId: String) async throws -> User? {
+                let snapshot = try await dataBase.collection("users").document(userId).getDocument()
+                
+                guard let data = snapshot.data(), snapshot.exists else {
+                        return nil
                 }
+                
+                return User(
+                        fireBaseUserId: userId,
+                        email: data["email"] as? String ?? "",
+                        name: data["name"] as? String,
+                        profileImageURL: data["profileImageURL"] as? String,
+                        isNotificationsEnabled: data["isNotificationsEnabled"] as? Bool ?? false
+                )
         }
 }

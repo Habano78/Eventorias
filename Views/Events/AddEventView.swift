@@ -116,29 +116,35 @@ struct AddEventView: View {
                                 // Bouton Créer
                                 ToolbarItem(placement: .confirmationAction) {
                                         
-                                        Button("Créer") {
-                                                if let currentUserId = Auth.auth().currentUser?.uid {
-                                                        
-                                                        eventListViewModel.addEvent(
-                                                                title: title,
-                                                                description: description,
-                                                                date: date,
-                                                                location: location,
-                                                                category: selectedCategory,
-                                                                userId: currentUserId,
-                                                                imageData: selectedImageData
-                                                        )
-                                                        
-                                                        dismiss()
-                                                } else {
-                                                        print("Erreur : Personne n'est connecté")
-                                                }
+                                        // Dans le body de ta Vue
+                                        Button("Ajouter l'événement") {
+                                                saveEvent() // ✅ Appel propre et court
                                         }
+                                        // .disabled(...) // Tes modifiers éventuels
                                         .disabled(title.isEmpty)
                                 }
                         }
                 }
                 .preferredColorScheme(.dark)
+        }
+        
+        private func saveEvent() {
+                // 1. On prépare l'image (conversion en Data) en dehors du Button
+                // Cela soulage énormément le compilateur
+                let imageData = selectedImage?.jpegData(compressionQuality: 0.5)
+                
+                // 2. On appelle la méthode du ViewModel
+                eventListViewModel.addEvent(
+                        title: title, // Tes variables @State
+                        description: description,
+                        date: date,
+                        locationName: location,
+                        category: selectedCategory,
+                        imageData: imageData
+                )
+                
+                // 3. On ferme la vue
+                dismiss()
         }
 }
 

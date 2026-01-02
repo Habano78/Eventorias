@@ -18,25 +18,31 @@ enum EventSortOption: String, CaseIterable, Identifiable {
 
 struct EventListView: View {
         
-        // MARK: properties
+        // MARK: dependence
         @Environment(EventListViewModel.self) var eventListViewModel
         
+        // MARK: properties
         @State private var searchText = ""
         @State private var showAddEventSheet = false
         @State private var selectedSortOption: EventSortOption = .dateAscending
         
-        /// Logique de filtrage ET de tri
         var filteredAndSortedEvents: [Event] {
-                let filtered: [Event]
-                if searchText.isEmpty {
-                        filtered = eventListViewModel.events
-                } else {
-                        filtered = eventListViewModel.events.filter { event in
+                var result = eventListViewModel.events
+                
+                //Filtrage par Catégorie (via ViewModel)
+                if let category = eventListViewModel.selectedCategory {
+                        result = result.filter { $0.category == category }
+                }
+                
+                //Filtrage par Recherche (Search Text)
+                if !searchText.isEmpty {
+                        result = result.filter { event in
                                 event.title.localizedCaseInsensitiveContains(searchText)
                         }
                 }
                 
-                return filtered.sorted { event1, event2 in
+                // 4. Tri
+                return result.sorted { event1, event2 in
                         switch selectedSortOption {
                         case .dateAscending: return event1.date < event2.date
                         case .dateDescending: return event1.date > event2.date
@@ -52,7 +58,6 @@ struct EventListView: View {
                         
                         ZStack(alignment: .bottomTrailing) {
                                 
-                                // CONTENU PRINCIPAL
                                 VStack(spacing: 0) {
                                         
                                         HStack {
@@ -91,7 +96,7 @@ struct EventListView: View {
                                                         HStack(spacing: 6) {
                                                                 Image(systemName: "arrow.up.arrow.down")
                                                                         .font(.footnote)
-                                                                Text("Sorting")
+                                                                Text("Trier")
                                                                         .font(.subheadline)
                                                                         .fontWeight(.medium)
                                                         }
@@ -105,8 +110,51 @@ struct EventListView: View {
                                                 Spacer()
                                         }
                                         .padding(.horizontal)
-                                        .padding(.vertical, 10)
+                                        .padding(.top, 10)
                                         
+                                        ScrollView(.horizontal, showsIndicators: false) {
+                                                HStack(spacing: 10) {
+                                                        
+                                                        Button(action: {
+                                                                withAnimation {
+                                                                        eventListViewModel.selectedCategory = nil
+                                                                }
+                                                        }) {
+                                                                Text("Tout")
+                                                                        .font(.subheadline)
+                                                                        .fontWeight(.semibold)
+                                                                        .padding(.horizontal, 16)
+                                                                        .padding(.vertical, 8)
+                                                                        .background(eventListViewModel.selectedCategory == nil ? Color.blue : Color(white: 0.25))
+                                                                        .foregroundColor(.white)
+                                                                        .cornerRadius(20)
+                                                        }
+                                                        
+                                                        // Boutons des Catégories
+                                                        ForEach(EventCategory.allCases, id: \.self) { category in
+                                                                Button(action: {
+                                                                        withAnimation {
+                                                                                if eventListViewModel.selectedCategory == category {
+                                                                                        eventListViewModel.selectedCategory = nil
+                                                                                } else {
+                                                                                        eventListViewModel.selectedCategory = category
+                                                                                }
+                                                                        }
+                                                                }) {
+                                                                        Text(category.rawValue.capitalized)
+                                                                                .font(.subheadline)
+                                                                                .fontWeight(.semibold)
+                                                                                .padding(.horizontal, 16)
+                                                                                .padding(.vertical, 8)
+                                                                                .background(eventListViewModel.selectedCategory == category ? Color.blue : Color(white: 0.25))
+                                                                                .foregroundColor(.white)
+                                                                                .cornerRadius(20)
+                                                                }
+                                                        }
+                                                }
+                                                .padding(.horizontal)
+                                        }
+                                        .padding(.bottom, 10)
                                         
                                         // LISTE
                                         Group {
@@ -139,7 +187,7 @@ struct EventListView: View {
                                                                         .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 4, trailing: 16))
                                                                         .listRowBackground(Color.black)
                                                                 }
-                                                                .onDelete(perform: eventListViewModel.deleteEvent)
+                                                                .onDelete(perform: deleteEvent)
                                                         }
                                                         .listStyle(.plain)
                                                         .scrollContentBackground(.hidden)
@@ -154,12 +202,20 @@ struct EventListView: View {
                                         Image("Button - Add new event")
                                                 .resizable()
                                                 .aspectRatio(contentMode: .fit)
-                                                .frame(width: 60, height: 60)
+                                                .frame(width: 40, height: 50)
                                                 .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 4)
                                 }
                                 .padding()
                                 .padding(.bottom, 10)
                         }
+                        // Opt
+                        .task {
+                                eventListViewModel.loadEventsIfNeeded()
+                        }
+                        .refreshable {
+                                await eventListViewModel.fetchEvents()
+                        }
+                        // --------------------------------------
                         .toolbar(.hidden, for: .navigationBar)
                         .background(Color.black.ignoresSafeArea())
                         .sheet(isPresented: $showAddEventSheet) {
@@ -167,6 +223,17 @@ struct EventListView: View {
                         }
                 }
                 .preferredColorScheme(.dark)
+        }
+        
+        // MARK: Helper Methods
+        
+        private func deleteEvent(at offsets: IndexSet) {
+                let eventsToDelete = offsets.map { filteredAndSortedEvents[$0] }
+                for event in eventsToDelete {
+                        Task {
+                                eventListViewModel.deleteEvent(withId: event.id)
+                        }
+                }
         }
 }
 

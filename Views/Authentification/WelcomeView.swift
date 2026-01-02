@@ -43,7 +43,7 @@ struct WelcomeView: View {
                                         Spacer()
                                         
                                         // Bouton "Sign in with email"
-                                        NavigationLink(destination: LoginView(viewModel: authViewModel)) {
+                                        NavigationLink(destination: LoginView()) {
                                                 HStack {
                                                         Image(systemName: "envelope.fill")
                                                         Text("Sign in with email")

@@ -19,7 +19,7 @@ struct User: Identifiable, Codable, Sendable {
                 return fireBaseUserId
         }
         
-        // Init
+        
         init(fireBaseUserId: String, email: String, name: String? = nil, profileImageURL: String? = nil, isNotificationsEnabled: Bool = false) {
                 self.fireBaseUserId = fireBaseUserId
                 self.email = email

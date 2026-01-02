@@ -8,13 +8,29 @@
 import Foundation
 import FirebaseAuth
 import Observation
-import SwiftUI // Pour UIImage
+import SwiftUI
 
+// MARK: - 1. La Classe Enveloppe (La clé de la solution)
+// Cette petite classe gère le "ticket" Firebase hors du MainActor.
+// Elle est marquée @unchecked Sendable car les handles Firebase sont thread-safe.
+private final class AuthListenerToken: @unchecked Sendable {
+        var handle: AuthStateDidChangeListenerHandle?
+        
+        deinit {
+                // C'est ici que le nettoyage se fait automatiquement
+                if let handle {
+                        Auth.auth().removeStateDidChangeListener(handle)
+                }
+        }
+}
+
+// MARK: - 2. Le ViewModel
+@MainActor
 @Observable
 class AuthViewModel {
         
-        //MARK: instances
-        private let service = Service()
+        // MARK: Instances
+        private let service = Service.shared
         
         // MARK: Properties
         var userSession: FirebaseAuth.User?
@@ -22,123 +38,127 @@ class AuthViewModel {
         var errorMessage: String?
         var isLoading: Bool = false
         
-        private var authStateHandler: AuthStateDidChangeListenerHandle? /// écoute de firebase
+        // ✅ CORRECTION DÉFINITIVE :
+        // On remplace "var authStateHandler" par notre token.
+        // "let" est constant, donc autorisé par Swift 6 même dans un MainActor.
+        private let listenerToken = AuthListenerToken()
         
         // MARK: init
         init() {
                 self.userSession = Auth.auth().currentUser
-                if let uid = userSession?.uid {
-                        fetchUser(fireBaseUserId: uid)
-                }
                 startListening()
         }
         
-        // MARK: Méthodes d'Écoute et Nettoyage
-        func startListening() {
-                authStateHandler = Auth.auth().addStateDidChangeListener { [weak self] _, fireBaseUser in
-                        self?.userSession = fireBaseUser
-                        
-                        if let uid = fireBaseUser?.uid {
-                                
-                                self?.fetchUser(fireBaseUserId: uid)
-                        } else {
-                               
-                                self?.currentUser = nil
-                        }
-                }
-        }
+        // ⚠️ Note : Il n'y a PLUS de 'deinit' dans ce ViewModel.
+        // C'est le 'listenerToken' qui s'occupera du nettoyage quand le ViewModel sera détruit.
         
-        deinit {
-                if let handler = authStateHandler {
-                        Auth.auth().removeStateDidChangeListener(handler)
+        // MARK: - Gestion de l'écoute
+        
+        func startListening() {
+                // On stocke le handle DANS le token
+                listenerToken.handle = Auth.auth().addStateDidChangeListener { [weak self] _, fireBaseUser in
+                        
+                        // On revient sur le MainActor pour mettre à jour l'interface
+                        Task { @MainActor [weak self] in
+                                self?.userSession = fireBaseUser
+                                
+                                if let uid = fireBaseUser?.uid {
+                                        await self?.fetchUser(fireBaseUserId: uid)
+                                } else {
+                                        self?.currentUser = nil
+                                }
+                        }
                 }
         }
         
         // MARK: - Méthodes Profil (Firestore)
         
-        func fetchUser(fireBaseUserId: String) {
+        func fetchUser(fireBaseUserId: String) async {
                 self.isLoading = true
-                
-                service.fetchUser(userId: fireBaseUserId) { [weak self] user in
-                        self?.currentUser = user
-                        self?.isLoading = false
+                do {
+                        self.currentUser = try await service.fetchUser(userId: fireBaseUserId)
+                } catch {
+                        print("Erreur chargement user: \(error.localizedDescription)")
                 }
+                self.isLoading = false
         }
         
-        /// Mettre à jour le profil
         func updateProfile(name: String, isNotifEnabled: Bool, image: UIImage?) {
                 guard let currentUid = userSession?.uid, let email = userSession?.email else { return }
                 
                 self.isLoading = true
+                self.errorMessage = nil
                 
-                func saveUserData(imageURL: String?) {
-                        let finalImageURL = imageURL ?? self.currentUser?.profileImageURL
-                        
-                        let updatedUser = User(
-                                fireBaseUserId: currentUid,
-                                email: email,
-                                name: name,
-                                profileImageURL: finalImageURL,
-                                isNotificationsEnabled: isNotifEnabled
-                        )
-                        
-                        service.saveUser(updatedUser) { success in
-                                if success {
-                                        self.currentUser = updatedUser
-                                } else {
-                                        self.errorMessage = "Erreur lors de la sauvegarde"
+                Task {
+                        do {
+                                var imageURL: String? = self.currentUser?.profileImageURL
+                                
+                                if let image = image, let imageData = image.jpegData(compressionQuality: 0.5) {
+                                        imageURL = try await service.uploadImage(data: imageData)
                                 }
-                                self.isLoading = false
+                                
+                                let updatedUser = User(
+                                        fireBaseUserId: currentUid,
+                                        email: email,
+                                        name: name,
+                                        profileImageURL: imageURL,
+                                        isNotificationsEnabled: isNotifEnabled
+                                )
+                                
+                                try await service.saveUser(updatedUser)
+                                self.currentUser = updatedUser
+                                
+                        } catch {
+                                self.errorMessage = "Erreur de sauvegarde : \(error.localizedDescription)"
                         }
-                }
-                
-                if let image = image, let imageData = image.jpegData(compressionQuality: 0.5) {
-                        service.uploadImage(data: imageData) { url in
-                                saveUserData(imageURL: url)
-                        }
-                } else {
-                        saveUserData(imageURL: nil)
+                        self.isLoading = false
                 }
         }
         
         // MARK: - Méthodes Authentification
         
         func signIn(email: String, password: String) {
-                Auth.auth().signIn(withEmail: email, password: password) { result, error in
-                        if let error = error {
-                                self.errorMessage = "Erreur : \(error.localizedDescription)"
-                                return
+                self.isLoading = true
+                self.errorMessage = nil
+                
+                Task {
+                        do {
+                                let _ = try await Auth.auth().signIn(withEmail: email, password: password)
+                        } catch {
+                                self.errorMessage = "Erreur connexion : \(error.localizedDescription)"
                         }
-                        self.errorMessage = nil
+                        self.isLoading = false
                 }
         }
         
         func signUp(email: String, password: String) {
-                Auth.auth().createUser(withEmail: email, password: password) { result, error in
-                        if let error = error {
-                                self.errorMessage = "Erreur création : \(error.localizedDescription)"
-                                return
-                        }
-                        
-                        /// Création du document utilisateur initial dans Firestore
-                        if let uid = result?.user.uid {
+                self.isLoading = true
+                self.errorMessage = nil
+                
+                Task {
+                        do {
+                                let result = try await Auth.auth().createUser(withEmail: email, password: password)
                                 
                                 let newUser = User(
-                                        fireBaseUserId: uid,
+                                        fireBaseUserId: result.user.uid,
                                         email: email,
-                                        name: "Nouvel Utilisateur"
+                                        name: "Nouvel Utilisateur",
+                                        profileImageURL: nil,
+                                        isNotificationsEnabled: false
                                 )
                                 
-                                self.service.saveUser(newUser) { _ in }
+                                try await service.saveUser(newUser)
+                        } catch {
+                                self.errorMessage = "Erreur inscription : \(error.localizedDescription)"
                         }
-                        
-                        self.errorMessage = nil
+                        self.isLoading = false
                 }
         }
         
         func signOut() {
                 do {
                         try Auth.auth().signOut()
+                        self.currentUser = nil
                 } catch {
                         self.errorMessage = "Erreur déconnexion"
                 }

@@ -12,7 +12,7 @@ import SwiftUI
 struct LoginView: View {
         
         //MARK: dependencies
-        var viewModel: AuthViewModel
+        @Environment(AuthViewModel.self) var authViewModel
         
         //MARK: properties
         @State private var email = ""
@@ -47,7 +47,7 @@ struct LoginView: View {
                                         .foregroundStyle(.white)
                                         .cornerRadius(10)
                                 
-                                if let errorMessage = viewModel.errorMessage {
+                                if let errorMessage = authViewModel.errorMessage {
                                         Text(errorMessage)
                                                 .foregroundStyle(.red)
                                                 .font(.caption)
@@ -55,9 +55,9 @@ struct LoginView: View {
                                 
                                 Button {
                                         if isLoginMode {
-                                                viewModel.signIn(email: email, password: password)
+                                                authViewModel.signIn(email: email, password: password)
                                         } else {
-                                                viewModel.signUp(email: email, password: password)
+                                                authViewModel.signUp(email: email, password: password)
                                         }
                                 } label: {
                                         Text(isLoginMode ? "Se connecter" : "Créer un compte")
@@ -84,5 +84,5 @@ struct LoginView: View {
 }
 
 #Preview {
-        LoginView(viewModel: AuthViewModel())
+        LoginView()
 }

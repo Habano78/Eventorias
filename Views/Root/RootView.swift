@@ -14,11 +14,11 @@ struct RootView: View {
         
         //MARK: body
         var body: some View {
-        
+                
                 if authViewModel.userSession != nil {
-                        AppTabView()
+                        AppTabView() 
                 } else {
-                        WelcomeView()
+                        LoginView()
                 }
         }
 }

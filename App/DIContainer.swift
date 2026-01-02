@@ -11,19 +11,14 @@ import FirebaseCore
 
 @Observable
 class DIContainer {
-    
-    var authViewModel: AuthViewModel
-    var eventListViewModel: EventListViewModel
-    
-//MARK: instance unique
-    private let eventService: Service
-    
-    init() {
-        if FirebaseApp.app() == nil {
-            FirebaseApp.configure()
+        
+        var authViewModel: AuthViewModel
+        var eventListViewModel: EventListViewModel
+        private let eventService: Service
+        
+        init() {
+                self.eventService = Service.shared
+                self.eventListViewModel = EventListViewModel()
+                self.authViewModel = AuthViewModel()
         }
-        self.eventService = Service()
-        self.eventListViewModel = EventListViewModel()
-        self.authViewModel = AuthViewModel()
-    }
 }

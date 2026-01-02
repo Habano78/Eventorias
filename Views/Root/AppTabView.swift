@@ -10,19 +10,39 @@ import SwiftUI
 struct AppTabView: View {
         
         var body: some View {
-                
+
                 TabView {
-                        
-                        EventListView()
-                                .tabItem {
-                                        Image ("Button - Event")
-                                }
-                        
-                        ProfileView()
-                                .tabItem {
-                                        Image ("Button - Profile")
-                                }
+                    
+                    // Liste
+                    EventListView()
+                        .tabItem {
+                            Image(systemName: "list.bullet")
+                            Text("Liste")
+                        }
+                    
+                    // Map
+                    EventMapView()
+                        .tabItem {
+                            Image(systemName: "map")
+                            Text("Carte")
+                        }
+
+                    // Calendrier
+                    CalendarView()
+                        .tabItem {
+                            Image(systemName: "calendar")
+                            Text("Calendrier")
+                        }
+                    
+                    // Profil
+                    ProfileView()
+                        .tabItem {
+                            Image(systemName: "person")
+                            Text("Profil")
+                        }
                 }
+                // change la couleur de l'onglet actif
+                .tint(.blue)
         }
 }
 
@@ -32,4 +52,5 @@ struct AppTabView: View {
         AppTabView()
                 .environment(container.authViewModel)
                 .environment(container.eventListViewModel)
+                .preferredColorScheme(.dark)
 }

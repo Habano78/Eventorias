@@ -11,16 +11,32 @@ import FirebaseAuth
 
 struct ProfileView: View {
         
+        // MARK: Dependencies
         @Environment(AuthViewModel.self) var authViewModel
+        @Environment(EventListViewModel.self) var eventListViewModel
         
-        // États locaux pour l'édition
+        // MARK: Local States
         @State private var name: String = ""
         @State private var isNotificationsEnabled: Bool = false
         @State private var selectedItem: PhotosPickerItem? = nil
         @State private var selectedImage: UIImage? = nil
         
+        // MARK: Computed Properties
+        var currentUser: User? { authViewModel.currentUser }
         
-        //MARK: body
+        var myCreatedEvents: [Event] {
+                guard let userID = currentUser?.id else { return [] }
+                return eventListViewModel.events.filter { $0.userId == userID }
+        }
+        
+        var myJoinedEvents: [Event] {
+                guard let userID = currentUser?.id else { return [] }
+                if let event = eventListViewModel.events.first {
+                }
+                return eventListViewModel.events.filter { $0.attendees.contains(userID) }
+        }
+        
+        // MARK: Body
         var body: some View {
                 NavigationStack {
                         ZStack {
@@ -32,19 +48,20 @@ struct ProfileView: View {
                                                 .foregroundStyle(.white)
                                 } else {
                                         Form {
-                                                // SECTION 1: AVATAR
+                                                
+                                                // --- SECTION 1 : AVATAR & INFO (Ton code existant) ---
                                                 Section {
                                                         HStack {
                                                                 Spacer()
                                                                 VStack {
-                                                                        // Affichage de l'image (Locale ou Distante ou Placeholder)
+                                                                        // Logique d'affichage Image (Locale > URL > Placeholder)
                                                                         if let selectedImage = selectedImage {
                                                                                 Image(uiImage: selectedImage)
                                                                                         .resizable()
                                                                                         .scaledToFill()
                                                                                         .frame(width: 100, height: 100)
                                                                                         .clipShape(Circle())
-                                                                        } else if let urlString = authViewModel.currentUser?.profileImageURL, let url = URL(string: urlString) {
+                                                                        } else if let urlString = currentUser?.profileImageURL, let url = URL(string: urlString) {
                                                                                 AsyncImage(url: url) { image in
                                                                                         image.resizable().scaledToFill()
                                                                                 } placeholder: {
@@ -59,56 +76,84 @@ struct ProfileView: View {
                                                                                         .frame(width: 100, height: 100)
                                                                         }
                                                                         
-                                                                        // Bouton Changement Photo
+                                                                        // Bouton modif photo
                                                                         PhotosPicker(selection: $selectedItem, matching: .images) {
                                                                                 Text("Modifier la photo")
                                                                                         .font(.footnote)
                                                                                         .foregroundStyle(.blue)
                                                                         }
                                                                 }
+                                                                .padding(.vertical, 5)
                                                                 Spacer()
                                                         }
                                                 }
                                                 .listRowBackground(Color.clear)
                                                 
-                                                // SECTION INFOS
+                                                // --- SECTION 2 : ÉDITION INFO ---
                                                 Section("Informations Personnelles") {
                                                         TextField("Nom complet", text: $name)
                                                         
                                                         HStack {
                                                                 Text("Email")
                                                                 Spacer()
-                                                                Text(authViewModel.userSession?.email ?? "")
+                                                                Text(currentUser?.email ?? "")
                                                                         .foregroundStyle(.gray)
                                                         }
                                                 }
                                                 
-                                                // Switch notifications
-                                                Section("Préférences") {
-                                                        Toggle("Notifications", isOn: $isNotificationsEnabled)
-                                                                .tint(.green) // Couleur active
+                                                // --- SECTION 3 : NOUVEAU - STATISTIQUES ---
+                                                Section {
+                                                        HStack {
+                                                                VStack {
+                                                                        Text("\(myCreatedEvents.count)")
+                                                                                .font(.title2).fontWeight(.bold).foregroundStyle(.blue)
+                                                                        Text("Créés").font(.caption).foregroundStyle(.gray)
+                                                                }
+                                                                .frame(maxWidth: .infinity)
+                                                                
+                                                                Divider()
+                                                                
+                                                                VStack {
+                                                                        Text("\(myJoinedEvents.count)")
+                                                                                .font(.title2).fontWeight(.bold).foregroundStyle(.green)
+                                                                        Text("Rejoints").font(.caption).foregroundStyle(.gray)
+                                                                }
+                                                                .frame(maxWidth: .infinity)
+                                                        }
+                                                        .padding(.vertical, 5)
                                                 }
                                                 
-                                                // ACTIONS
-                                                Section {
+                                                // --- SECTION 4 : MES ÉVÉNEMENTS ---
+                                                if !myCreatedEvents.isEmpty {
+                                                        Section("Mes Événements Créés") {
+                                                                ForEach(myCreatedEvents) { event in
+                                                                        NavigationLink(destination: EventDetailView(event: event)) {
+                                                                                Text(event.title)
+                                                                        }
+                                                                }
+                                                                // Suppression par swipe
+                                                                .onDelete { indexSet in
+                                                                        deleteEvents(at: indexSet)
+                                                                }
+                                                        }
+                                                }
+                                                
+                                                // --- SECTION 5 : RÉGLAGES & ACTIONS ---
+                                                Section("Préférences & Actions") {
+                                                        Toggle("Notifications", isOn: $isNotificationsEnabled)
+                                                                .tint(.green)
+                                                        
                                                         Button {
-                                                                authViewModel.updateProfile(
-                                                                        name: name,
-                                                                        isNotifEnabled: isNotificationsEnabled,
-                                                                        image: selectedImage
-                                                                )
+                                                                saveProfileChanges()
                                                         } label: {
                                                                 Text("Enregistrer les modifications")
-                                                                        .frame(maxWidth: .infinity)
-                                                                        .foregroundStyle(.white)
+                                                                        .foregroundStyle(.blue)
                                                         }
-                                                        .listRowBackground(Color.blue)
                                                         
                                                         Button(role: .destructive) {
                                                                 authViewModel.signOut()
                                                         } label: {
                                                                 Text("Se déconnecter")
-                                                                        .frame(maxWidth: .infinity)
                                                         }
                                                 }
                                         }
@@ -117,13 +162,12 @@ struct ProfileView: View {
                         }
                         .navigationTitle("Mon Profil")
                         .onAppear {
-                                /// Charger les données existantes dans les champs
-                                if let user = authViewModel.currentUser {
+                                if let user = currentUser {
                                         self.name = user.name ?? ""
                                         self.isNotificationsEnabled = user.isNotificationsEnabled
                                 }
                         }
-                        /// Gestion de la sélection photo
+                        // Gestion photo
                         .onChange(of: selectedItem) { _, newItem in
                                 Task {
                                         if let data = try? await newItem?.loadTransferable(type: Data.self),
@@ -135,9 +179,31 @@ struct ProfileView: View {
                 }
                 .preferredColorScheme(.dark)
         }
+        
+        // MARK: Helper Functions
+        
+        private func saveProfileChanges() {
+                authViewModel.updateProfile(
+                        name: name,
+                        isNotifEnabled: isNotificationsEnabled,
+                        image: selectedImage
+                )
+        }
+        
+        private func deleteEvents(at indexSet: IndexSet) {
+                
+                let eventsToDelete = indexSet.map { myCreatedEvents[$0] }
+                
+                for event in eventsToDelete {
+                        withAnimation {
+                                eventListViewModel.deleteEvent(withId: event.id)
+                        }
+                }
+        }
 }
 
 #Preview {
         ProfileView()
                 .environment(AuthViewModel())
+                .environment(EventListViewModel())
 }
