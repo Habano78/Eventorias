@@ -9,16 +9,17 @@ import SwiftUI
 import Observation
 import FirebaseCore
 
+@MainActor
 @Observable
-class DIContainer {
+final class DIContainer {
         
-        var authViewModel: AuthViewModel
-        var eventListViewModel: EventListViewModel
-        private let eventService: Service
+        let service: EventServiceProtocol
+        let authViewModel: AuthViewModel
+        let eventListViewModel: EventListViewModel
         
-        init() {
-                self.eventService = Service.shared
-                self.eventListViewModel = EventListViewModel()
-                self.authViewModel = AuthViewModel()
+        init(service: EventServiceProtocol) {
+                self.service = service
+                self.authViewModel = AuthViewModel(service: service)
+                self.eventListViewModel = EventListViewModel(service: service)
         }
 }

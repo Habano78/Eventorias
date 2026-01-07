@@ -17,9 +17,11 @@ import FirebaseAuth
 
 struct MyEventsView: View {
         
-        //MARK: properties
+        //MARK: Properties
         @Environment(EventListViewModel.self) var viewModel
         
+        
+        //MARK: Computed properties
         var myTickets: [Event] {
                 guard let currentUserId = Auth.auth().currentUser?.uid else { return [] }
                 
@@ -32,11 +34,10 @@ struct MyEventsView: View {
         var body: some View {
                 NavigationStack {
                         ZStack {
-                                // Fond noir pour rester dans le thème
+                                
                                 Color.black.ignoresSafeArea()
                                 
                                 if myTickets.isEmpty {
-                                        // Si PAS DE TICKETS
                                         VStack(spacing: 20) {
                                                 Image(systemName: "ticket")
                                                         .font(.system(size: 60))
@@ -51,7 +52,6 @@ struct MyEventsView: View {
                                                         .padding(.horizontal)
                                         }
                                 } else {
-                                        //LISTE DES TICKETS
                                         List {
                                                 ForEach(myTickets) { event in
                                                         
@@ -89,13 +89,4 @@ struct MyEventsView: View {
                         .toolbarColorScheme(.dark, for: .navigationBar)
                 }
         }
-}
-
-#Preview {
-    
-    let container = DIContainer()
-    
-    // 2. On injecte le ViewModel qui est DÉJÀ prêt dans le conteneur
-    MyEventsView()
-        .environment(container.eventListViewModel)
 }

@@ -10,27 +10,24 @@ import FirebaseAuth
 import Observation
 import SwiftUI
 
-// MARK: - 1. La Classe Enveloppe (La clé de la solution)
-// Cette petite classe gère le "ticket" Firebase hors du MainActor.
-// Elle est marquée @unchecked Sendable car les handles Firebase sont thread-safe.
+// MARK: Classe Enveloppe
 private final class AuthListenerToken: @unchecked Sendable {
         var handle: AuthStateDidChangeListenerHandle?
         
         deinit {
-                // C'est ici que le nettoyage se fait automatiquement
                 if let handle {
                         Auth.auth().removeStateDidChangeListener(handle)
                 }
         }
 }
 
-// MARK: - 2. Le ViewModel
+// MARK: ViewModel
 @MainActor
 @Observable
 class AuthViewModel {
         
         // MARK: Instances
-        private let service = Service.shared
+        private let service: EventServiceProtocol
         
         // MARK: Properties
         var userSession: FirebaseAuth.User?
@@ -38,27 +35,20 @@ class AuthViewModel {
         var errorMessage: String?
         var isLoading: Bool = false
         
-        // ✅ CORRECTION DÉFINITIVE :
-        // On remplace "var authStateHandler" par notre token.
-        // "let" est constant, donc autorisé par Swift 6 même dans un MainActor.
         private let listenerToken = AuthListenerToken()
         
         // MARK: init
-        init() {
+        init(service: EventServiceProtocol) {
+                self.service = service
                 self.userSession = Auth.auth().currentUser
                 startListening()
         }
         
-        // ⚠️ Note : Il n'y a PLUS de 'deinit' dans ce ViewModel.
-        // C'est le 'listenerToken' qui s'occupera du nettoyage quand le ViewModel sera détruit.
-        
         // MARK: - Gestion de l'écoute
         
         func startListening() {
-                // On stocke le handle DANS le token
                 listenerToken.handle = Auth.auth().addStateDidChangeListener { [weak self] _, fireBaseUser in
                         
-                        // On revient sur le MainActor pour mettre à jour l'interface
                         Task { @MainActor [weak self] in
                                 self?.userSession = fireBaseUser
                                 
@@ -71,7 +61,7 @@ class AuthViewModel {
                 }
         }
         
-        // MARK: - Méthodes Profil (Firestore)
+        // MARK: - Méthodes Profil
         
         func fetchUser(fireBaseUserId: String) async {
                 self.isLoading = true
@@ -83,8 +73,10 @@ class AuthViewModel {
                 self.isLoading = false
         }
         
+        
         func updateProfile(name: String, isNotifEnabled: Bool, image: UIImage?) {
-                guard let currentUid = userSession?.uid, let email = userSession?.email else { return }
+                
+                guard let currentUid = currentUser?.fireBaseUserId, let email = currentUser?.email else { return }
                 
                 self.isLoading = true
                 self.errorMessage = nil
@@ -109,7 +101,7 @@ class AuthViewModel {
                                 self.currentUser = updatedUser
                                 
                         } catch {
-                                self.errorMessage = "Erreur de sauvegarde : \(error.localizedDescription)"
+                                self.errorMessage = "Erreur sauvegarde : \(error.localizedDescription)"
                         }
                         self.isLoading = false
                 }
@@ -123,7 +115,8 @@ class AuthViewModel {
                 
                 Task {
                         do {
-                                let _ = try await Auth.auth().signIn(withEmail: email, password: password)
+                                let uid = try await service.signIn(email: email, password: password)
+                                await self.fetchUser(fireBaseUserId: uid)
                         } catch {
                                 self.errorMessage = "Erreur connexion : \(error.localizedDescription)"
                         }
@@ -137,10 +130,10 @@ class AuthViewModel {
                 
                 Task {
                         do {
-                                let result = try await Auth.auth().createUser(withEmail: email, password: password)
+                                let uid = try await service.signUp(email: email, password: password)
                                 
                                 let newUser = User(
-                                        fireBaseUserId: result.user.uid,
+                                        fireBaseUserId: uid,
                                         email: email,
                                         name: "Nouvel Utilisateur",
                                         profileImageURL: nil,
@@ -148,6 +141,8 @@ class AuthViewModel {
                                 )
                                 
                                 try await service.saveUser(newUser)
+                                self.currentUser = newUser
+                                
                         } catch {
                                 self.errorMessage = "Erreur inscription : \(error.localizedDescription)"
                         }
@@ -157,10 +152,12 @@ class AuthViewModel {
         
         func signOut() {
                 do {
-                        try Auth.auth().signOut()
+                        try service.signOut()
                         self.currentUser = nil
+                        self.userSession = nil
                 } catch {
                         self.errorMessage = "Erreur déconnexion"
                 }
         }
+        
 }

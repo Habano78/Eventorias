@@ -14,7 +14,7 @@ enum EventCategory: String, CaseIterable, Codable, Identifiable, Hashable {
         case food = "Food"
         case book = "Book"
         case film = "Film"
-        case sport = "Charity"
+        case sport = "Sport"
         case other = "Other"
         
         var id: String { self.rawValue }

@@ -21,6 +21,7 @@
 		2285A2622EF16DAD000D512A /* DIContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A2612EF16DAD000D512A /* DIContainer.swift */; };
 		2285A27D2EF1D943000D512A /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A27C2EF1D943000D512A /* Service.swift */; };
 		2285A29A2EF32F3B000D512A /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 2285A2992EF32F3B000D512A /* FirebaseStorage */; };
+		2285A2CF2F0D792F000D512A /* LocationHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A2CE2F0D792F000D512A /* LocationHelper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,17 +55,13 @@
 		2285A24D2EF0438F000D512A /* EventCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventCategory.swift; sourceTree = "<group>"; };
 		2285A2612EF16DAD000D512A /* DIContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DIContainer.swift; sourceTree = "<group>"; };
 		2285A27C2EF1D943000D512A /* Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
+		2285A2CE2F0D792F000D512A /* LocationHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationHelper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		2285A2132EF00B47000D512A /* EventoriasTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = EventoriasTests;
-			sourceTree = "<group>";
-		};
-		2285A21D2EF00B47000D512A /* EventoriasUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = EventoriasUITests;
 			sourceTree = "<group>";
 		};
 		2285A2532EF0651F000D512A /* Authentification */ = {
@@ -126,9 +123,9 @@
 				2285A2302EF00C0E000D512A /* Models */,
 				2285A23C2EF02463000D512A /* ViewModels */,
 				2285A23B2EF0245A000D512A /* Views */,
+				2285A2CD2F0D7911000D512A /* Helpers */,
 				2285A2322EF00C29000D512A /* Resources */,
 				2285A2132EF00B47000D512A /* EventoriasTests */,
-				2285A21D2EF00B47000D512A /* EventoriasUITests */,
 				2285A2042EF00B45000D512A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -198,6 +195,14 @@
 			path = ViewModels;
 			sourceTree = "<group>";
 		};
+		2285A2CD2F0D7911000D512A /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				2285A2CE2F0D792F000D512A /* LocationHelper.swift */,
+			);
+			path = Helpers;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -264,9 +269,6 @@
 			);
 			dependencies = (
 				2285A21C2EF00B47000D512A /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				2285A21D2EF00B47000D512A /* EventoriasUITests */,
 			);
 			name = EventoriasUITests;
 			packageProductDependencies = (
@@ -359,6 +361,7 @@
 				2285A24A2EF03FF0000D512A /* AuthViewModel.swift in Sources */,
 				2285A23E2EF0249E000D512A /* EventListViewModel.swift in Sources */,
 				2285A2382EF01CB4000D512A /* User.swift in Sources */,
+				2285A2CF2F0D792F000D512A /* LocationHelper.swift in Sources */,
 				2285A27D2EF1D943000D512A /* Service.swift in Sources */,
 				2285A2622EF16DAD000D512A /* DIContainer.swift in Sources */,
 				2285A2072EF00B45000D512A /* EventoriasApp.swift in Sources */,

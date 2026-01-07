@@ -31,8 +31,6 @@ struct ProfileView: View {
         
         var myJoinedEvents: [Event] {
                 guard let userID = currentUser?.id else { return [] }
-                if let event = eventListViewModel.events.first {
-                }
                 return eventListViewModel.events.filter { $0.attendees.contains(userID) }
         }
         
@@ -49,12 +47,12 @@ struct ProfileView: View {
                                 } else {
                                         Form {
                                                 
-                                                // --- SECTION 1 : AVATAR & INFO (Ton code existant) ---
+                                                // SECTION 1 : AVATAR & INFO
                                                 Section {
                                                         HStack {
                                                                 Spacer()
                                                                 VStack {
-                                                                        // Logique d'affichage Image (Locale > URL > Placeholder)
+                                                                        
                                                                         if let selectedImage = selectedImage {
                                                                                 Image(uiImage: selectedImage)
                                                                                         .resizable()
@@ -89,7 +87,7 @@ struct ProfileView: View {
                                                 }
                                                 .listRowBackground(Color.clear)
                                                 
-                                                // --- SECTION 2 : ÉDITION INFO ---
+                                                // SECTION 2 : ÉDITION INFO
                                                 Section("Informations Personnelles") {
                                                         TextField("Nom complet", text: $name)
                                                         
@@ -101,7 +99,7 @@ struct ProfileView: View {
                                                         }
                                                 }
                                                 
-                                                // --- SECTION 3 : NOUVEAU - STATISTIQUES ---
+                                                // STATISTIQUES
                                                 Section {
                                                         HStack {
                                                                 VStack {
@@ -123,7 +121,7 @@ struct ProfileView: View {
                                                         .padding(.vertical, 5)
                                                 }
                                                 
-                                                // --- SECTION 4 : MES ÉVÉNEMENTS ---
+                                                // MES ÉVÉNEMENTS
                                                 if !myCreatedEvents.isEmpty {
                                                         Section("Mes Événements Créés") {
                                                                 ForEach(myCreatedEvents) { event in
@@ -138,7 +136,7 @@ struct ProfileView: View {
                                                         }
                                                 }
                                                 
-                                                // --- SECTION 5 : RÉGLAGES & ACTIONS ---
+                                                // RÉGLAGES & ACTIONS
                                                 Section("Préférences & Actions") {
                                                         Toggle("Notifications", isOn: $isNotificationsEnabled)
                                                                 .tint(.green)
@@ -196,14 +194,8 @@ struct ProfileView: View {
                 
                 for event in eventsToDelete {
                         withAnimation {
-                                eventListViewModel.deleteEvent(withId: event.id)
+                                eventListViewModel.deleteEvent(event)
                         }
                 }
         }
-}
-
-#Preview {
-        ProfileView()
-                .environment(AuthViewModel())
-                .environment(EventListViewModel())
 }

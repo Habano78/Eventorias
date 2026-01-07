@@ -29,19 +29,19 @@ struct EventListView: View {
         var filteredAndSortedEvents: [Event] {
                 var result = eventListViewModel.events
                 
-                //Filtrage par Catégorie (via ViewModel)
+                //Filtrage par Catégorie 
                 if let category = eventListViewModel.selectedCategory {
                         result = result.filter { $0.category == category }
                 }
                 
-                //Filtrage par Recherche (Search Text)
+                //Filtrage par Recherche
                 if !searchText.isEmpty {
                         result = result.filter { event in
                                 event.title.localizedCaseInsensitiveContains(searchText)
                         }
                 }
                 
-                // 4. Tri
+                /// Tri
                 return result.sorted { event1, event2 in
                         switch selectedSortOption {
                         case .dateAscending: return event1.date < event2.date
@@ -131,7 +131,7 @@ struct EventListView: View {
                                                         }
                                                         
                                                         // Boutons des Catégories
-                                                        ForEach(EventCategory.allCases, id: \.self) { category in
+                                                        ForEach(EventCategory.allCases) { category in
                                                                 Button(action: {
                                                                         withAnimation {
                                                                                 if eventListViewModel.selectedCategory == category {
@@ -215,7 +215,6 @@ struct EventListView: View {
                         .refreshable {
                                 await eventListViewModel.fetchEvents()
                         }
-                        // --------------------------------------
                         .toolbar(.hidden, for: .navigationBar)
                         .background(Color.black.ignoresSafeArea())
                         .sheet(isPresented: $showAddEventSheet) {
@@ -231,13 +230,8 @@ struct EventListView: View {
                 let eventsToDelete = offsets.map { filteredAndSortedEvents[$0] }
                 for event in eventsToDelete {
                         Task {
-                                eventListViewModel.deleteEvent(withId: event.id)
+                                eventListViewModel.deleteEvent(event)
                         }
                 }
         }
-}
-
-#Preview {
-        EventListView()
-                .environment(EventListViewModel())
 }

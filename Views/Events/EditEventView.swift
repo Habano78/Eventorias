@@ -14,7 +14,7 @@ struct EditEventView: View {
         @Environment(EventListViewModel.self) var eventListViewModel
         @Environment(\.dismiss) var dismiss
         
-        // États locaux initialisés avec des valeurs vides (on les remplira dans onAppear)
+        // États locaux
         @State private var title = ""
         @State private var description = ""
         @State private var location = ""
@@ -25,6 +25,7 @@ struct EditEventView: View {
         @State private var selectedItem: PhotosPickerItem? = nil
         @State private var selectedImage: UIImage? = nil
         
+        //MARK: Body
         var body: some View {
                 NavigationStack {
                         Form {
@@ -44,7 +45,6 @@ struct EditEventView: View {
                                 }
                                 
                                 Section("Photo") {
-                                        // Logique d'affichage : Nouvelle image > Ancienne URL > Placeholder
                                         if let newImage = selectedImage {
                                                 Image(uiImage: newImage)
                                                         .resizable().scaledToFill()
@@ -76,7 +76,6 @@ struct EditEventView: View {
                                         .disabled(title.isEmpty)
                                 }
                         }
-                        // Au chargement de la vue, on remplit les champs avec les infos actuelles
                         .onAppear {
                                 self.title = event.title
                                 self.description = event.description
@@ -84,7 +83,6 @@ struct EditEventView: View {
                                 self.date = event.date
                                 self.selectedCategory = event.category
                         }
-                        // Gestion changement photo
                         .onChange(of: selectedItem) { _, newItem in
                                 Task {
                                         if let data = try? await newItem?.loadTransferable(type: Data.self),
@@ -99,7 +97,7 @@ struct EditEventView: View {
         private func saveChanges() {
                 let newImageData = selectedImage?.jpegData(compressionQuality: 0.5)
                 
-                eventListViewModel.updateEvent(
+                eventListViewModel.editEvent(
                         event: event,
                         title: title,
                         description: description,

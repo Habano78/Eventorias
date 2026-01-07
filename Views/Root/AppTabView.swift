@@ -41,13 +41,12 @@ struct AppTabView: View {
                             Text("Profil")
                         }
                 }
-                // change la couleur de l'onglet actif
                 .tint(.blue)
         }
 }
 
 #Preview {
-        let container = DIContainer()
+        let container = DIContainer(service: Service.shared)
         
         AppTabView()
                 .environment(container.authViewModel)

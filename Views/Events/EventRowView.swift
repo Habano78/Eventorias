@@ -23,7 +23,7 @@ struct EventRowView: View {
                         
                         // Avatar/Titre/Date
                         HStack(spacing: 12) {
-                               
+                                
                                 Image(systemName: "person.crop.circle.fill")
                                         .resizable()
                                         .aspectRatio(contentMode: .fill)
@@ -56,15 +56,6 @@ struct EventRowView: View {
                 }
                 .background(Color(white: 0.1))
                 .clipShape(RoundedRectangle(cornerRadius: 16))
-               
-        }
-}
-
-// MARK: - Preview
-#Preview {
-        ZStack {
-                Color.black.ignoresSafeArea()
-                EventRowView(event: Event(userId: "1", title: "Music Festival", description: "Test", date: Date(), location: "Paris", category: .music, latitude: 48.8566, longitude: 2.3522))
-                        .padding()
+                
         }
 }

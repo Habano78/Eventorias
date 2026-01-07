@@ -21,8 +21,6 @@ struct EventMapView: View {
         var body: some View {
                 NavigationStack {
                         MapReader { proxy in
-                                
-                                // CORRECTIF 1 : on ajoute 'interactionModes: .all' pour garantir le zoom/pan
                                 Map(position: $position, interactionModes: .all, selection: $selectedEvent) {
                                         
                                         ForEach(viewModel.events) { event in
@@ -61,17 +59,11 @@ struct EventMapView: View {
                                 .task {
                                         viewModel.loadEventsIfNeeded()
                                 }
-                                // Gestion de la feuille
                                 .sheet(item: $selectedEvent) { event in
-                                        
-                                        // CORRECTIF 2 : On enveloppe la feuille dans son propre NavigationStack
                                         NavigationStack {
                                                 EventPreviewSheet(event: event)
                                         }
-                                        // IMPORTANT : On doit re-donner le ViewModel à la sheet car c'est une vue séparée !
                                         .environment(viewModel)
-                                        
-                                        // Réglages de la taille de la feuille
                                         .presentationDetents([.fraction(0.3), .medium])
                                         .presentationBackgroundInteraction(.enabled(upThrough: .fraction(0.3)))
                                 }
@@ -166,9 +158,4 @@ struct EventPreviewSheet: View {
                 .toolbar(.hidden, for: .navigationBar)
                 .background(Color(UIColor.secondarySystemBackground))
         }
-}
-
-#Preview {
-        EventMapView()
-                .environment(EventListViewModel())
 }

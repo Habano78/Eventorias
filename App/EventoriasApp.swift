@@ -22,16 +22,17 @@ struct EventoriasApp: App {
         @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
         @State private var container: DIContainer
         
-        
         //MARK: Init
+
         init() {
-                // Conf
+
                 if FirebaseApp.app() == nil {
                         FirebaseApp.configure()
                 }
-                
-                // Init
-                _container = State(initialValue: DIContainer())
+               
+                    _container = State(
+                        initialValue: DIContainer(service: Service.shared)
+                    )
                 
                 requestNotificationPermission()
         }
@@ -39,9 +40,9 @@ struct EventoriasApp: App {
         func requestNotificationPermission() {
                 UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
                     if granted {
-                        print("✅ Permission Notifications accordée !")
+                        print("Permission Notifications accordée !")
                     } else if let error = error {
-                        print("❌ Erreur Permission : \(error.localizedDescription)")
+                        print("Erreur Permission : \(error.localizedDescription)")
                     } else {
                         print("⚠️ Permission Notifications refusée.")
                     }
@@ -58,3 +59,5 @@ struct EventoriasApp: App {
                 }
         }
 }
+
+

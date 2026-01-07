@@ -4,7 +4,6 @@
 //
 //  Created by Perez William on 15/12/2025.
 //
-//
 
 import SwiftUI
 import FirebaseAuth
@@ -12,28 +11,30 @@ import PhotosUI
 
 struct AddEventView: View {
         
-        //MARK: properties
+        // MARK: properties
         @Environment(EventListViewModel.self) var eventListViewModel
         @Environment(\.dismiss) var dismiss
         
-        // Champs du formulaire
+        /// Champs du formulaire
         @State private var title = ""
         @State private var description = ""
         @State private var location = ""
         @State private var date = Date()
         @State private var selectedCategory: EventCategory = .music
         
-        // Gestion Image
+        /// Gestion Image
         @State private var selectedItem: PhotosPickerItem? = nil
         @State private var selectedImageData: Data? = nil
         @State private var selectedImage: UIImage? = nil
         
         
-        //MARK: body
+        @State private var isSaving = false
+        
+        // MARK: body
         var body: some View {
                 NavigationStack {
                         Form {
-                                /// Section 1 : Infos
+                                /// Infos
                                 Section(header: Text("Détails de l'événement")) {
                                         TextField("Titre de l'événement", text: $title)
                                         
@@ -44,22 +45,21 @@ struct AddEventView: View {
                                         }
                                 }
                                 
-                                /// Section 2 : Date et Lieu
+                                /// Date et Lieu
                                 Section(header: Text("Quand et Où ?")) {
                                         DatePicker("Date", selection: $date, displayedComponents: [.date, .hourAndMinute])
                                         TextField("Lieu (Ville, Adresse)", text: $location)
                                 }
                                 
-                                /// Section 3 : Description
+                                /// Description
                                 Section(header: Text("Description")) {
                                         TextEditor(text: $description)
                                                 .frame(height: 100)
                                 }
                                 
-                                /// Section 4 : Photo
+                                /// Photo
                                 Section(header: Text("Photo de l'événement")) {
                                         HStack {
-                                                /// Aperçu de l'image sélectionnée
                                                 if let image = selectedImage {
                                                         Image(uiImage: image)
                                                                 .resizable()
@@ -94,6 +94,7 @@ struct AddEventView: View {
                         .navigationTitle("Nouvel Événement")
                         .navigationBarTitleDisplayMode(.inline)
                         
+                        // Gestion de la sélection d'image
                         .onChange(of: selectedItem) { oldValue, newItem in
                                 Task {
                                         if let data = try? await newItem?.loadTransferable(type: Data.self),
@@ -115,39 +116,57 @@ struct AddEventView: View {
                                 
                                 // Bouton Créer
                                 ToolbarItem(placement: .confirmationAction) {
-                                        
-                                        // Dans le body de ta Vue
-                                        Button("Ajouter l'événement") {
-                                                saveEvent() // ✅ Appel propre et court
+                                        Button {
+                                                saveEvent()
+                                        } label: {
+                                                if isSaving {
+                                                        ProgressView()
+                                                } else {
+                                                        Text("Ajouter")
+                                                }
                                         }
-                                        // .disabled(...) // Tes modifiers éventuels
-                                        .disabled(title.isEmpty)
+                                        .disabled(title.isEmpty || location.isEmpty || isSaving)
                                 }
                         }
                 }
                 .preferredColorScheme(.dark)
+                // Désactive l'interaction si on sauvegarde
+                .interactiveDismissDisabled(isSaving)
         }
         
+        // MARK: - Logic (Updated)
+        
         private func saveEvent() {
-                // 1. On prépare l'image (conversion en Data) en dehors du Button
-                // Cela soulage énormément le compilateur
-                let imageData = selectedImage?.jpegData(compressionQuality: 0.5)
+                isSaving = true
                 
-                // 2. On appelle la méthode du ViewModel
-                eventListViewModel.addEvent(
-                        title: title, // Tes variables @State
-                        description: description,
-                        date: date,
-                        locationName: location,
-                        category: selectedCategory,
-                        imageData: imageData
-                )
-                
-                // 3. On ferme la vue
-                dismiss()
+                Task {
+                        
+                        var latitude = 0.0
+                        var longitude = 0.0
+                        
+                        do {
+                                let coordinates = try await LocationHelper.getCoordinates(from: location)
+                                latitude = coordinates.latitude
+                                longitude = coordinates.longitude
+                        } catch {
+                                print("Erreur GPS : \(error.localizedDescription). Utilisation par défaut (0,0).")
+                        }
+                        
+                        let imageData = selectedImage?.jpegData(compressionQuality: 0.5)
+                        
+                        eventListViewModel.addEvent(
+                                title: title,
+                                description: description,
+                                date: date,
+                                location: location,
+                                category: selectedCategory,
+                                latitude: latitude,
+                                longitude: longitude,
+                                newImageData: imageData
+                        )
+                        
+                        isSaving = false
+                        dismiss()
+                }
         }
-}
-
-#Preview {
-        AddEventView()
 }

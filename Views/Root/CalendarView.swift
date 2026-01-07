@@ -66,9 +66,3 @@ struct CalendarView: View {
                 }
         }
 }
-
-#Preview {
-        CalendarView()
-                .environment(EventListViewModel())
-                .preferredColorScheme(.dark)
-}

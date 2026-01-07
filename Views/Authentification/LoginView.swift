@@ -25,13 +25,13 @@ struct LoginView: View {
                         
                         Color.black.ignoresSafeArea()
                         VStack(spacing: 20) {
-                                // Titre
+                                /// Titre
                                 Text(isLoginMode ? "Connexion" : "Inscription")
                                         .font(.largeTitle)
                                         .fontWeight(.bold)
                                         .foregroundStyle(.white)
                                 
-                                // Email
+                                /// Email
                                 TextField("Email", text: $email)
                                         .keyboardType(.emailAddress)
                                         .autocapitalization(.none)
@@ -40,7 +40,7 @@ struct LoginView: View {
                                         .foregroundStyle(.white)
                                         .cornerRadius(10)
                                 
-                                // Mot de passe
+                                /// Mot de passe
                                 SecureField("Mot de passe", text: $password)
                                         .padding()
                                         .background(Color(white: 0.15))
@@ -81,8 +81,4 @@ struct LoginView: View {
                 }
                 .preferredColorScheme(.dark)
         }
-}
-
-#Preview {
-        LoginView()
 }

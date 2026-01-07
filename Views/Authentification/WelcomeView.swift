@@ -22,16 +22,15 @@ struct WelcomeView: View {
                                 VStack(spacing: 30) {
                                         Spacer()
                                         
-                                        // Logo/Titre
+                                        /// Logo/Titre
                                         VStack(spacing: 20) {
                                                 
                                                 Image("Logo")
                                                         .resizable()
                                                         .aspectRatio(contentMode: .fit)
                                                         .frame(width: 100, height: 100)
-                                                // .colorInvert()
                                                 
-                                                // Texte
+                                                /// Texte
                                                 Text("EVENTORIAS")
                                                         .font(.custom("Times New Roman", size: 35))
                                                         .fontWeight(.bold)
@@ -42,7 +41,7 @@ struct WelcomeView: View {
                                         
                                         Spacer()
                                         
-                                        // Bouton "Sign in with email"
+                                        /// Bouton "Sign in "
                                         NavigationLink(destination: LoginView()) {
                                                 HStack {
                                                         Image(systemName: "envelope.fill")
@@ -62,9 +61,4 @@ struct WelcomeView: View {
                 }
                 .preferredColorScheme(.dark)
         }
-}
-
-#Preview {
-        WelcomeView()
-                .environment(AuthViewModel())
 }

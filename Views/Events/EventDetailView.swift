@@ -19,6 +19,7 @@ struct EventDetailView: View {
         
         @State private var showEditSheet = false
         
+        
         //MARK: Computed Properties
         var isParticipating: Bool {
                 guard let currentUserId = Auth.auth().currentUser?.uid else { return false }
@@ -37,7 +38,6 @@ struct EventDetailView: View {
                 return event.attendees.count
         }
         
-        // Message formaté pour le partage
         var shareMessage: String {
                 return """
                 📅 Je t'invite à l'événement : \(event.title) !
@@ -54,10 +54,11 @@ struct EventDetailView: View {
                 ScrollView {
                         VStack(alignment: .leading, spacing: 20) {
                                 
-                                // IMAGE
+                                /// Image
                                 Group {
+                                        
                                         if let imageURL = event.imageURL, let url = URL(string: imageURL) {
-                                                
+
                                                 AsyncImage(url: url) { phase in
                                                         switch phase {
                                                         case .empty:
@@ -70,7 +71,7 @@ struct EventDetailView: View {
                                                                         .resizable()
                                                                         .aspectRatio(contentMode: .fill)
                                                         case .failure:
-                                                                Image(event.category.assetName) // Fallback si erreur téléchargement
+                                                                Image(event.category.assetName)
                                                                         .resizable()
                                                                         .aspectRatio(contentMode: .fill)
                                                         @unknown default:
@@ -88,7 +89,7 @@ struct EventDetailView: View {
                                 .clipped()
                                 .clipShape(RoundedRectangle(cornerRadius: 24))
                                 
-                                // Date/Heure/Avatar
+                                /// Date/Heure/Avatar
                                 HStack(alignment: .center) {
                                         VStack(alignment: .leading, spacing: 8) {
                                                 /// Date
@@ -110,9 +111,8 @@ struct EventDetailView: View {
                                         .font(.subheadline)
                                         
                                         Spacer()
-                                        
                                         /// Avatar (Exemple statique pour l'instant)
-                                        Image("Avatar (3)") // Assure-toi que cette image existe
+                                        Image("Avatar (3)")
                                                 .resizable()
                                                 .aspectRatio(contentMode: .fill)
                                                 .frame(width: 60, height: 60)
@@ -133,7 +133,6 @@ struct EventDetailView: View {
                                                 Image(systemName: "person.2.fill")
                                                         .font(.subheadline)
                                                 
-                                                // CORRECTION : On utilise le compteur dynamique
                                                 Text("\(attendeesCount)")
                                                         .font(.headline)
                                                         .fontWeight(.bold)
@@ -151,9 +150,8 @@ struct EventDetailView: View {
                                         
                                         Spacer()
                                         
-                                        // BOUTON PARTICIPER
+                                        /// BOUTON PARTICIPER
                                         Button {
-                                                // Feedback Haptique (Vibration légère)
                                                 let generator = UIImpactFeedbackGenerator(style: .medium)
                                                 generator.impactOccurred()
                                                 
@@ -169,8 +167,8 @@ struct EventDetailView: View {
                                                                 .fontWeight(.bold)
                                                 }
                                                 .font(.subheadline)
-                                                .frame(width: 140, height: 45) // Un peu plus grand pour être cliquable
-                                                .background(isParticipating ? Color(white: 0.2) : Color.blue) // Bleu quand on peut rejoindre
+                                                .frame(width: 140, height: 45)
+                                                .background(isParticipating ? Color(white: 0.2) : Color.blue) 
                                                 .foregroundStyle(.white)
                                                 .clipShape(Capsule())
                                                 .shadow(color: isParticipating ? .clear : .blue.opacity(0.4), radius: 10, x: 0, y: 5)
@@ -196,7 +194,6 @@ struct EventDetailView: View {
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         
                                         // Map Dynamique
-                                        // CORRECTION : On utilise les vraies coordonnées de l'event !
                                         Map(initialPosition: .region(MKCoordinateRegion(
                                                 center: CLLocationCoordinate2D(latitude: event.latitude, longitude: event.longitude),
                                                 span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
@@ -240,21 +237,4 @@ struct EventDetailView: View {
                 .navigationTitle(event.title)
                 .navigationBarTitleDisplayMode(.inline)
         }
-}
-
-// MARK: preview
-#Preview {
-        EventDetailView(event: Event(
-                userId: "1",
-                title: "Soirée Test",
-                description: "Ceci est une description de test pour voir si tout s'affiche bien.",
-                date: Date(),
-                location: "Tour Eiffel, Paris",
-                category: .sport,
-                attendees: ["user1", "user2"],
-                imageURL: nil,
-                latitude: 48.8584,
-                longitude: 2.2945
-        ))
-        .environment(EventListViewModel())
 }
