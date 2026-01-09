@@ -31,17 +31,26 @@ struct EditEventView: View {
                         Form {
                                 Section("Infos") {
                                         TextField("Titre", text: $title)
+                                                .accessibilityLabel("Modifier le titre")
+                                        
                                         Picker("Catégorie", selection: $selectedCategory) {
                                                 ForEach(EventCategory.allCases) { cat in
                                                         Text(cat.rawValue).tag(cat)
                                                 }
                                         }
+                                        .accessibilityLabel("Modifier la catégorie")
                                 }
                                 
                                 Section("Détails") {
                                         DatePicker("Date", selection: $date)
+                                                .accessibilityLabel("Modifier la date et l'heure")
+                                        
                                         TextField("Lieu", text: $location)
-                                        TextEditor(text: $description).frame(height: 100)
+                                                .accessibilityLabel("Modifier le lieu")
+                                        
+                                        TextEditor(text: $description)
+                                                .frame(height: 100)
+                                                .accessibilityLabel("Modifier la description")
                                 }
                                 
                                 Section("Photo") {
@@ -49,6 +58,7 @@ struct EditEventView: View {
                                                 Image(uiImage: newImage)
                                                         .resizable().scaledToFill()
                                                         .frame(height: 200).clipped().cornerRadius(10)
+                                                        .accessibilityLabel("Nouvelle photo sélectionnée")
                                         } else if let urlString = event.imageURL, let url = URL(string: urlString) {
                                                 AsyncImage(url: url) { img in
                                                         img.resizable().scaledToFill()
@@ -56,11 +66,14 @@ struct EditEventView: View {
                                                         ProgressView()
                                                 }
                                                 .frame(height: 200).clipped().cornerRadius(10)
+                                                .accessibilityLabel("Photo actuelle de l'événement")
                                         }
                                         
                                         PhotosPicker(selection: $selectedItem, matching: .images) {
                                                 Label("Changer la photo", systemImage: "photo")
                                         }
+                                        .accessibilityLabel("Changer la photo")
+                                        .accessibilityHint("Ouvre la galerie pour remplacer l'image existante")
                                 }
                         }
                         .navigationTitle("Modifier")
@@ -68,12 +81,14 @@ struct EditEventView: View {
                         .toolbar {
                                 ToolbarItem(placement: .cancellationAction) {
                                         Button("Annuler") { dismiss() }
+                                                .accessibilityHint("Annule les modifications")
                                 }
                                 ToolbarItem(placement: .confirmationAction) {
                                         Button("Enregistrer") {
                                                 saveChanges()
                                         }
                                         .disabled(title.isEmpty)
+                                        .accessibilityLabel("Sauvegarder les modifications")
                                 }
                         }
                         .onAppear {

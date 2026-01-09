@@ -47,7 +47,7 @@ struct ProfileView: View {
                                 } else {
                                         Form {
                                                 
-                                                // SECTION 1 : AVATAR & INFO
+                                                /// Avatar + Info
                                                 Section {
                                                         HStack {
                                                                 Spacer()
@@ -59,6 +59,7 @@ struct ProfileView: View {
                                                                                         .scaledToFill()
                                                                                         .frame(width: 100, height: 100)
                                                                                         .clipShape(Circle())
+                                                                                        .accessibilityLabel("Nouvelle photo de profil")
                                                                         } else if let urlString = currentUser?.profileImageURL, let url = URL(string: urlString) {
                                                                                 AsyncImage(url: url) { image in
                                                                                         image.resizable().scaledToFill()
@@ -67,11 +68,13 @@ struct ProfileView: View {
                                                                                 }
                                                                                 .frame(width: 100, height: 100)
                                                                                 .clipShape(Circle())
+                                                                                .accessibilityLabel("Photo de profil actuelle")
                                                                         } else {
                                                                                 Image(systemName: "person.circle.fill")
                                                                                         .resizable()
                                                                                         .foregroundStyle(.gray)
                                                                                         .frame(width: 100, height: 100)
+                                                                                        .accessibilityHidden(true)
                                                                         }
                                                                         
                                                                         // Bouton modif photo
@@ -80,8 +83,9 @@ struct ProfileView: View {
                                                                                         .font(.footnote)
                                                                                         .foregroundStyle(.blue)
                                                                         }
+                                                                        .padding(.vertical, 5)
+                                                                        .accessibilityHint("Ouvre la galerie pour changer votre avatar")
                                                                 }
-                                                                .padding(.vertical, 5)
                                                                 Spacer()
                                                         }
                                                 }
@@ -90,6 +94,7 @@ struct ProfileView: View {
                                                 // SECTION 2 : ÉDITION INFO
                                                 Section("Informations Personnelles") {
                                                         TextField("Nom complet", text: $name)
+                                                                .accessibilityLabel("Nom d'utilisateur")
                                                         
                                                         HStack {
                                                                 Text("Email")
@@ -97,6 +102,8 @@ struct ProfileView: View {
                                                                 Text(currentUser?.email ?? "")
                                                                         .foregroundStyle(.gray)
                                                         }
+                                                        .accessibilityElement(children: .combine)
+                                                        .accessibilityLabel("Email : \(currentUser?.email ?? "Inconnu")")
                                                 }
                                                 
                                                 // STATISTIQUES
@@ -108,6 +115,8 @@ struct ProfileView: View {
                                                                         Text("Créés").font(.caption).foregroundStyle(.gray)
                                                                 }
                                                                 .frame(maxWidth: .infinity)
+                                                                .accessibilityElement(children: .combine)
+                                                                .accessibilityLabel("\(myCreatedEvents.count) événements créés")
                                                                 
                                                                 Divider()
                                                                 
@@ -117,29 +126,33 @@ struct ProfileView: View {
                                                                         Text("Rejoints").font(.caption).foregroundStyle(.gray)
                                                                 }
                                                                 .frame(maxWidth: .infinity)
+                                                                .accessibilityElement(children: .combine)
+                                                                .accessibilityLabel("\(myJoinedEvents.count) événements rejoints")
                                                         }
                                                         .padding(.vertical, 5)
                                                 }
                                                 
-                                                // MES ÉVÉNEMENTS
+                                                /// Mes evenements
                                                 if !myCreatedEvents.isEmpty {
                                                         Section("Mes Événements Créés") {
                                                                 ForEach(myCreatedEvents) { event in
                                                                         NavigationLink(destination: EventDetailView(event: event)) {
                                                                                 Text(event.title)
                                                                         }
+                                                                        .accessibilityLabel("Gérer l'événement \(event.title)")
                                                                 }
-                                                                // Suppression par swipe
+                                                                /// Suppression par swipe
                                                                 .onDelete { indexSet in
                                                                         deleteEvents(at: indexSet)
                                                                 }
                                                         }
                                                 }
                                                 
-                                                // RÉGLAGES & ACTIONS
+                                                /// Reglages
                                                 Section("Préférences & Actions") {
                                                         Toggle("Notifications", isOn: $isNotificationsEnabled)
                                                                 .tint(.green)
+                                                                .accessibilityHint("Active ou désactive les notifications push")
                                                         
                                                         Button {
                                                                 saveProfileChanges()
@@ -147,12 +160,14 @@ struct ProfileView: View {
                                                                 Text("Enregistrer les modifications")
                                                                         .foregroundStyle(.blue)
                                                         }
+                                                        .accessibilityHint("Sauvegarde votre nom et vos préférences")
                                                         
                                                         Button(role: .destructive) {
                                                                 authViewModel.signOut()
                                                         } label: {
                                                                 Text("Se déconnecter")
                                                         }
+                                                        .accessibilityLabel("Se déconnecter du compte")
                                                 }
                                         }
                                         .scrollContentBackground(.hidden)
@@ -165,7 +180,7 @@ struct ProfileView: View {
                                         self.isNotificationsEnabled = user.isNotificationsEnabled
                                 }
                         }
-                        // Gestion photo
+                        /// Gestion photo
                         .onChange(of: selectedItem) { _, newItem in
                                 Task {
                                         if let data = try? await newItem?.loadTransferable(type: Data.self),

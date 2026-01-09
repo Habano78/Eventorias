@@ -29,6 +29,7 @@ struct WelcomeView: View {
                                                         .resizable()
                                                         .aspectRatio(contentMode: .fit)
                                                         .frame(width: 100, height: 100)
+                                                        .accessibilityHidden(true)
                                                 
                                                 /// Texte
                                                 Text("EVENTORIAS")
@@ -37,6 +38,7 @@ struct WelcomeView: View {
                                                         .foregroundStyle(.white)
                                                         .kerning(5)
                                                         .shadow(color: .white.opacity(0.3), radius: 10, x: 0, y: 0)
+                                                        .accessibilityAddTraits(.isHeader)
                                         }
                                         
                                         Spacer()
@@ -56,6 +58,8 @@ struct WelcomeView: View {
                                         }
                                         .padding(.horizontal, 30)
                                         .padding(.bottom, 200)
+                                        .accessibilityLabel("Se connecter avec un email")
+                                        .accessibilityHint("Accéder à l'écran de connexion ou d'inscription")
                                 }
                         }
                 }

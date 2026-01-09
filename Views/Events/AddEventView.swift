@@ -27,7 +27,6 @@ struct AddEventView: View {
         @State private var selectedImageData: Data? = nil
         @State private var selectedImage: UIImage? = nil
         
-        
         @State private var isSaving = false
         
         // MARK: body
@@ -37,24 +36,34 @@ struct AddEventView: View {
                                 /// Infos
                                 Section(header: Text("Détails de l'événement")) {
                                         TextField("Titre de l'événement", text: $title)
+                                                .accessibilityLabel("Titre de l'événement")
+                                                .accessibilityHint("Obligatoire")
                                         
                                         Picker("Catégorie", selection: $selectedCategory) {
                                                 ForEach(EventCategory.allCases) { category in
                                                         Text(category.rawValue).tag(category)
                                                 }
                                         }
+                                        .accessibilityLabel("Catégorie")
+                                        .accessibilityHint("Sélectionnez le type d'événement")
                                 }
                                 
                                 /// Date et Lieu
                                 Section(header: Text("Quand et Où ?")) {
                                         DatePicker("Date", selection: $date, displayedComponents: [.date, .hourAndMinute])
+                                                .accessibilityLabel("Date et heure de début")
+                                        
                                         TextField("Lieu (Ville, Adresse)", text: $location)
+                                                .accessibilityLabel("Lieu de l'événement")
+                                                .accessibilityHint("Ville ou adresse précise")
                                 }
                                 
                                 /// Description
                                 Section(header: Text("Description")) {
                                         TextEditor(text: $description)
                                                 .frame(height: 100)
+                                                .accessibilityLabel("Description détaillée")
+                                                .accessibilityHint("Décrivez le programme de l'événement")
                                 }
                                 
                                 /// Photo
@@ -66,6 +75,7 @@ struct AddEventView: View {
                                                                 .scaledToFill()
                                                                 .frame(width: 80, height: 80)
                                                                 .clipShape(RoundedRectangle(cornerRadius: 10))
+                                                                .accessibilityLabel("Aperçu de la photo sélectionnée")
                                                 } else {
                                                         /// Placeholder
                                                         RoundedRectangle(cornerRadius: 10)
@@ -75,6 +85,7 @@ struct AddEventView: View {
                                                                         Image(systemName: "photo")
                                                                                 .foregroundStyle(.gray)
                                                                 }
+                                                                .accessibilityHidden(true)
                                                 }
                                                 
                                                 Spacer()
@@ -87,6 +98,8 @@ struct AddEventView: View {
                                                         }
                                                         .foregroundStyle(.blue)
                                                 }
+                                                .accessibilityLabel("Choisir une photo dans la bibliothèque")
+                                                .accessibilityHint("Ouvre la galerie photos")
                                         }
                                         .padding(.vertical, 5)
                                 }
@@ -94,7 +107,7 @@ struct AddEventView: View {
                         .navigationTitle("Nouvel Événement")
                         .navigationBarTitleDisplayMode(.inline)
                         
-                        // Gestion de la sélection d'image
+                        /// Gestion de la sélection d'image
                         .onChange(of: selectedItem) { oldValue, newItem in
                                 Task {
                                         if let data = try? await newItem?.loadTransferable(type: Data.self),
@@ -107,14 +120,15 @@ struct AddEventView: View {
                         }
                         
                         .toolbar {
-                                // Bouton Annuler
+                                /// Bouton Annuler
                                 ToolbarItem(placement: .cancellationAction) {
                                         Button("Annuler") {
                                                 dismiss()
                                         }
+                                        .accessibilityHint("Ferme la fenêtre sans enregistrer")
                                 }
                                 
-                                // Bouton Créer
+                                /// Bouton Créer
                                 ToolbarItem(placement: .confirmationAction) {
                                         Button {
                                                 saveEvent()
@@ -126,15 +140,16 @@ struct AddEventView: View {
                                                 }
                                         }
                                         .disabled(title.isEmpty || location.isEmpty || isSaving)
+                                        .accessibilityLabel("Enregistrer l'événement")
+                                        .accessibilityHint(title.isEmpty || location.isEmpty ? "Remplissez le titre et le lieu pour activer ce bouton" : "Crée l'événement et ferme la fenêtre")
                                 }
                         }
                 }
                 .preferredColorScheme(.dark)
-                // Désactive l'interaction si on sauvegarde
                 .interactiveDismissDisabled(isSaving)
         }
         
-        // MARK: - Logic (Updated)
+        // MARK: MiseAJour
         
         private func saveEvent() {
                 isSaving = true

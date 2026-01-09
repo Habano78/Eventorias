@@ -9,28 +9,24 @@ import SwiftUI
 
 struct EventRowView: View {
         
-        //MARK: properties
+        // MARK: Properties
         let event: Event
         
-        private var formattedDate: String {
-                event.date.formatted(date: .long, time: .omitted)
-        }
-        
-        //MARK: body
+        // MARK: Body
         var body: some View {
                 
                 HStack(spacing: 0) {
                         
-                        // Avatar/Titre/Date
                         HStack(spacing: 12) {
-                                
+                
                                 Image(systemName: "person.crop.circle.fill")
                                         .resizable()
                                         .aspectRatio(contentMode: .fill)
                                         .frame(width: 50, height: 50)
+                                        .foregroundStyle(.gray)
                                         .clipShape(Circle())
                                 
-                                VStack(alignment: .leading, spacing: 10) {
+                                VStack(alignment: .leading, spacing: 4) { 
                                         
                                         Text(event.title)
                                                 .font(.headline)
@@ -47,15 +43,18 @@ struct EventRowView: View {
                         
                         Spacer()
                         
-                        // Event Image
                         Image(event.category.assetName)
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
-                                .frame(width: 130, height: 100)
+                                .frame(width: 120, height: 90)
                                 .clipped()
+                                .background(Color(white: 0.12))
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
+                        // MARK: Accessibilité
+                                .accessibilityElement(children: .ignore)
+                                .accessibilityLabel("Événement \(event.title), le \(event.date.formatted(date: .long, time: .omitted)), à \(event.location)")
+                                .accessibilityHint("Double-tapez pour voir les détails")
+                                .accessibilityAddTraits(.isButton)
                 }
-                .background(Color(white: 0.1))
-                .clipShape(RoundedRectangle(cornerRadius: 16))
-                
         }
 }

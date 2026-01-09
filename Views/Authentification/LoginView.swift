@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-import SwiftUI
-
 struct LoginView: View {
         
         //MARK: dependencies
@@ -30,6 +28,7 @@ struct LoginView: View {
                                         .font(.largeTitle)
                                         .fontWeight(.bold)
                                         .foregroundStyle(.white)
+                                        .accessibilityAddTraits(.isHeader)
                                 
                                 /// Email
                                 TextField("Email", text: $email)
@@ -39,6 +38,8 @@ struct LoginView: View {
                                         .background(Color(white: 0.15))
                                         .foregroundStyle(.white)
                                         .cornerRadius(10)
+                                        .accessibilityLabel("Adresse email")
+                                        .accessibilityInputLabels(["Email"])
                                 
                                 /// Mot de passe
                                 SecureField("Mot de passe", text: $password)
@@ -46,11 +47,13 @@ struct LoginView: View {
                                         .background(Color(white: 0.15))
                                         .foregroundStyle(.white)
                                         .cornerRadius(10)
+                                        .accessibilityLabel("Mot de passe")
                                 
                                 if let errorMessage = authViewModel.errorMessage {
                                         Text(errorMessage)
                                                 .foregroundStyle(.red)
                                                 .font(.caption)
+                                                .accessibilityLabel("Erreur : \(errorMessage)")
                                 }
                                 
                                 Button {
@@ -67,6 +70,8 @@ struct LoginView: View {
                                                 .foregroundStyle(.white)
                                                 .cornerRadius(10)
                                 }
+                                .accessibilityLabel(isLoginMode ? "Se connecter" : "S'inscrire")
+                                .accessibilityHint("Valide le formulaire")
                                 
                                 Button {
                                         withAnimation {
@@ -76,6 +81,8 @@ struct LoginView: View {
                                         Text(isLoginMode ? "Pas encore de compte ? S'inscrire" : "Déjà un compte ? Se connecter")
                                                 .foregroundStyle(.gray)
                                 }
+                                .accessibilityLabel(isLoginMode ? "Basculer vers l'inscription" : "Basculer vers la connexion")
+                                .accessibilityHint("Change le mode du formulaire")
                         }
                         .padding()
                 }
