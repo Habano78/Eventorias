@@ -44,12 +44,3 @@ struct AppTabView: View {
                 .tint(.blue)
         }
 }
-
-#Preview {
-        let container = DIContainer(service: Service.shared)
-        
-        AppTabView()
-                .environment(container.authViewModel)
-                .environment(container.eventListViewModel)
-                .preferredColorScheme(.dark)
-}

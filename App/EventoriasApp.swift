@@ -8,7 +8,6 @@
 import SwiftUI
 import FirebaseCore
 
-
 class AppDelegate: NSObject, UIApplicationDelegate {
         func application(_ application: UIApplication,
                          didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
@@ -20,36 +19,31 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 struct EventoriasApp: App {
         
         @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-        @State private var container: DIContainer
         
-        //MARK: Init
-
+       let container: DIContainer
+        
+        // MARK: Init
         init() {
-
+                
                 if FirebaseApp.app() == nil {
                         FirebaseApp.configure()
                 }
-               
-                    _container = State(
-                        initialValue: DIContainer(service: Service.shared)
-                    )
+                self.container = DIContainer()
                 
                 requestNotificationPermission()
         }
         
         func requestNotificationPermission() {
                 UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
-                    if granted {
-                        print("Permission Notifications accordée !")
-                    } else if let error = error {
-                        print("Erreur Permission : \(error.localizedDescription)")
-                    } else {
-                        print("⚠️ Permission Notifications refusée.")
-                    }
+                        if granted {
+                                print("Permission Notifications accordée !")
+                        } else if let error = error {
+                                print("Erreur Permission : \(error.localizedDescription)")
+                        }
                 }
-            }
+        }
         
-        //MARK: Body
+        // MARK: Body
         var body: some Scene {
                 WindowGroup {
                         RootView()
@@ -59,5 +53,3 @@ struct EventoriasApp: App {
                 }
         }
 }
-
-

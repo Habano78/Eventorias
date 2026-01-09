@@ -8,27 +8,35 @@
 import Foundation
 import Observation
 import UserNotifications
+import SwiftUI // Pour Data si besoin
 
 @MainActor
 @Observable
 class EventListViewModel {
         
-        // MARK: - Properties
+        //MARK: Dépendances
+        private let eventService: any EventServiceProtocol
+        private let authService: any AuthServiceProtocol
+        
+        // MARK: Properties
         var events: [Event] = []
         var isLoading = false
         var errorMessage: String?
-        
         var selectedCategory: EventCategory? = nil
         
-        private let service: EventServiceProtocol
         
         var currentUserId: String? {
-                return service.currentUserId
+                return authService.currentUserId
         }
         
         // MARK: Init
-        init(service: EventServiceProtocol) {
-                self.service = service
+        init(
+                eventService: any EventServiceProtocol,
+                authService: any AuthServiceProtocol
+        )
+        {
+                self.eventService = eventService
+                self.authService = authService
         }
         
         // MARK: Lecture
@@ -36,10 +44,10 @@ class EventListViewModel {
                 isLoading = true
                 errorMessage = nil
                 do {
-                        self.events = try await service.fetchEvents()
+                        events = try await eventService.fetchEvents()
                 } catch {
                         print("Erreur Fetch : \(error.localizedDescription)")
-                        self.errorMessage = "Erreur de chargement."
+                        errorMessage = "Erreur de chargement."
                 }
                 isLoading = false
         }
@@ -54,13 +62,13 @@ class EventListViewModel {
         func addEvent(title: String, description: String, date: Date, location: String, category: EventCategory, latitude: Double, longitude: Double, newImageData: Data?) {
                 
                 guard let uid = currentUserId else { return }
-                self.isLoading = true
+                isLoading = true
                 
                 Task {
                         do {
                                 var imageURL: String? = nil
                                 if let imageData = newImageData {
-                                        imageURL = try await service.uploadImage(data: imageData)
+                                        imageURL = try await eventService.uploadEventImage(data: imageData)
                                 }
                                 
                                 let newEvent = Event(
@@ -76,40 +84,47 @@ class EventListViewModel {
                                         longitude: longitude
                                 )
                                 
-                                try await service.addEvent(newEvent)
-                                
+                                try await eventService.addEvent(newEvent)
                                 await fetchEvents()
-                                print("Événement créé avec succès (Image: \(imageURL != nil))")
                                 
                         } catch {
                                 print("Erreur création : \(error.localizedDescription)")
-                                self.errorMessage = "Impossible de créer l'événement."
+                                errorMessage = "Impossible de créer l'événement."
                         }
-                        self.isLoading = false
+                        isLoading = false
                 }
         }
         
         func deleteEvent(_ event: Event) {
-                if let index = events.firstIndex(where: { $0.id == event.id }) {
-                        events.remove(at: index)
-                }
+              
+                guard let index = events.firstIndex(where: { $0.id == event.id }) else { return }
+                
+                events.remove(at: index)
                 
                 Task {
                         do {
-                                try await service.deleteEvent(eventId: event.id)
+                                try await eventService.deleteEvent(eventId: event.id)
                                 cancelNotification(for: event)
                         } catch {
-                                print("Erreur suppression : \(error)")
-                                await fetchEvents()
+                                print(" Erreur suppression : \(error)")
+                                
+                                if index <= self.events.count {
+                                        events.insert(event, at: index)
+                                } else {
+                                        events.append(event)
+                                }
+                                
+                                errorMessage = "Impossible de supprimer l'événement."
                         }
                 }
         }
+        
         // Édition
         func editEvent(event: Event, title: String, description: String, date: Date, location: String, category: EventCategory, newImageData: Data?) {
                 self.isLoading = true
                 Task {
                         do {
-                                try await service.editEvent(
+                                try await eventService.editEvent(
                                         event: event,
                                         title: title,
                                         description: description,
@@ -119,6 +134,7 @@ class EventListViewModel {
                                         newImageData: newImageData
                                 )
                                 
+                                // Mise à jour notification
                                 if let currentUid = currentUserId, event.attendees.contains(currentUid) {
                                         cancelNotification(for: event)
                                         let updatedEvent = Event(id: event.id, userId: event.userId, title: title, description: description, date: date, location: location, category: category, attendees: event.attendees, imageURL: event.imageURL, latitude: event.latitude, longitude: event.longitude)
@@ -128,8 +144,9 @@ class EventListViewModel {
                                 await fetchEvents()
                         } catch {
                                 print("Erreur édition : \(error)")
+                                errorMessage = "Impossible de modifier l'événement."
                         }
-                        self.isLoading = false
+                        isLoading = false
                 }
         }
         
@@ -137,10 +154,11 @@ class EventListViewModel {
         func toggleParticipation(event: Event) {
                 guard let currentUserId = currentUserId else { return }
                 guard let index = events.firstIndex(where: { $0.id == event.id }) else { return }
-                let liveEvent = events[index]
                 
+                let liveEvent = events[index]
                 let isJoining = !liveEvent.attendees.contains(currentUserId)
                 
+                // Optimistic UI
                 var updatedAttendees = liveEvent.attendees
                 if isJoining {
                         updatedAttendees.append(currentUserId)
@@ -149,19 +167,18 @@ class EventListViewModel {
                         updatedAttendees.removeAll { $0 == currentUserId }
                         cancelNotification(for: liveEvent)
                 }
-                
                 events[index].attendees = updatedAttendees
                 
                 Task {
                         do {
-                                try await service.updateParticipation(eventId: liveEvent.id, userId: currentUserId, isJoining: isJoining)
+                                try await eventService.updateParticipation(eventId: liveEvent.id, userId: currentUserId, isJoining: isJoining)
                         } catch {
                                 await fetchEvents()
                         }
                 }
         }
         
-        // MARK: Notifications
+        // MARK: - Notifications (locales)
         private func scheduleNotification(for event: Event) {
                 let content = UNMutableNotificationContent()
                 content.title = "Rappel : \(event.title)"

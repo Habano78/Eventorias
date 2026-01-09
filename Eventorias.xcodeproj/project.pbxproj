@@ -19,20 +19,16 @@
 		2285A24A2EF03FF0000D512A /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A2492EF03FF0000D512A /* AuthViewModel.swift */; };
 		2285A24E2EF0438F000D512A /* EventCategory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A24D2EF0438F000D512A /* EventCategory.swift */; };
 		2285A2622EF16DAD000D512A /* DIContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A2612EF16DAD000D512A /* DIContainer.swift */; };
-		2285A27D2EF1D943000D512A /* Service.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A27C2EF1D943000D512A /* Service.swift */; };
+		2285A27D2EF1D943000D512A /* EventService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A27C2EF1D943000D512A /* EventService.swift */; };
 		2285A29A2EF32F3B000D512A /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 2285A2992EF32F3B000D512A /* FirebaseStorage */; };
 		2285A2CF2F0D792F000D512A /* LocationHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A2CE2F0D792F000D512A /* LocationHelper.swift */; };
+		2285A2D92F0FA911000D512A /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A2D82F0FA911000D512A /* AuthService.swift */; };
+		2285A2DC2F0FA948000D512A /* UserService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A2DB2F0FA948000D512A /* UserService.swift */; };
+		2285A2E02F0FD5EB000D512A /* ImageStorageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A2DE2F0FD5EB000D512A /* ImageStorageService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		2285A2112EF00B47000D512A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 2285A1FB2EF00B45000D512A /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 2285A2022EF00B45000D512A;
-			remoteInfo = Eventorias;
-		};
-		2285A21B2EF00B47000D512A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 2285A1FB2EF00B45000D512A /* Project object */;
 			proxyType = 1;
@@ -46,7 +42,6 @@
 		2285A2062EF00B45000D512A /* EventoriasApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventoriasApp.swift; sourceTree = "<group>"; };
 		2285A20A2EF00B47000D512A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2285A2102EF00B47000D512A /* EventoriasTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EventoriasTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		2285A21A2EF00B47000D512A /* EventoriasUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EventoriasUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2285A2352EF01C20000D512A /* Event.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Event.swift; sourceTree = "<group>"; };
 		2285A2372EF01CB4000D512A /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		2285A23D2EF0249E000D512A /* EventListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventListViewModel.swift; sourceTree = "<group>"; };
@@ -54,14 +49,17 @@
 		2285A2492EF03FF0000D512A /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
 		2285A24D2EF0438F000D512A /* EventCategory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventCategory.swift; sourceTree = "<group>"; };
 		2285A2612EF16DAD000D512A /* DIContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DIContainer.swift; sourceTree = "<group>"; };
-		2285A27C2EF1D943000D512A /* Service.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Service.swift; sourceTree = "<group>"; };
+		2285A27C2EF1D943000D512A /* EventService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventService.swift; sourceTree = "<group>"; };
 		2285A2CE2F0D792F000D512A /* LocationHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationHelper.swift; sourceTree = "<group>"; };
+		2285A2D82F0FA911000D512A /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
+		2285A2DB2F0FA948000D512A /* UserService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserService.swift; sourceTree = "<group>"; };
+		2285A2DE2F0FD5EB000D512A /* ImageStorageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageStorageService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		2285A2132EF00B47000D512A /* EventoriasTests */ = {
+		2285A2132EF00B47000D512A /* ViewModelTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = EventoriasTests;
+			path = ViewModelTests;
 			sourceTree = "<group>";
 		};
 		2285A2532EF0651F000D512A /* Authentification */ = {
@@ -84,6 +82,11 @@
 			path = Profile;
 			sourceTree = "<group>";
 		};
+		2285A2E22F0FDC54000D512A /* Mocks */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Mocks;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,13 +107,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		2285A2172EF00B47000D512A /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -125,7 +121,7 @@
 				2285A23B2EF0245A000D512A /* Views */,
 				2285A2CD2F0D7911000D512A /* Helpers */,
 				2285A2322EF00C29000D512A /* Resources */,
-				2285A2132EF00B47000D512A /* EventoriasTests */,
+				2285A2E12F0FDC1B000D512A /* EventoriasTests */,
 				2285A2042EF00B45000D512A /* Products */,
 			);
 			sourceTree = "<group>";
@@ -135,7 +131,6 @@
 			children = (
 				2285A2032EF00B45000D512A /* Eventorias.app */,
 				2285A2102EF00B47000D512A /* EventoriasTests.xctest */,
-				2285A21A2EF00B47000D512A /* EventoriasUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -152,7 +147,10 @@
 		2285A22F2EF00C05000D512A /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				2285A27C2EF1D943000D512A /* Service.swift */,
+				2285A27C2EF1D943000D512A /* EventService.swift */,
+				2285A2D82F0FA911000D512A /* AuthService.swift */,
+				2285A2DB2F0FA948000D512A /* UserService.swift */,
+				2285A2DE2F0FD5EB000D512A /* ImageStorageService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -203,6 +201,15 @@
 			path = Helpers;
 			sourceTree = "<group>";
 		};
+		2285A2E12F0FDC1B000D512A /* EventoriasTests */ = {
+			isa = PBXGroup;
+			children = (
+				2285A2E22F0FDC54000D512A /* Mocks */,
+				2285A2132EF00B47000D512A /* ViewModelTests */,
+			);
+			path = EventoriasTests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -248,7 +255,8 @@
 				2285A2122EF00B47000D512A /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				2285A2132EF00B47000D512A /* EventoriasTests */,
+				2285A2132EF00B47000D512A /* ViewModelTests */,
+				2285A2E22F0FDC54000D512A /* Mocks */,
 			);
 			name = EventoriasTests;
 			packageProductDependencies = (
@@ -256,26 +264,6 @@
 			productName = EventoriasTests;
 			productReference = 2285A2102EF00B47000D512A /* EventoriasTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		2285A2192EF00B47000D512A /* EventoriasUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 2285A22A2EF00B47000D512A /* Build configuration list for PBXNativeTarget "EventoriasUITests" */;
-			buildPhases = (
-				2285A2162EF00B47000D512A /* Sources */,
-				2285A2172EF00B47000D512A /* Frameworks */,
-				2285A2182EF00B47000D512A /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				2285A21C2EF00B47000D512A /* PBXTargetDependency */,
-			);
-			name = EventoriasUITests;
-			packageProductDependencies = (
-			);
-			productName = EventoriasUITests;
-			productReference = 2285A21A2EF00B47000D512A /* EventoriasUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
 
@@ -291,10 +279,6 @@
 						CreatedOnToolsVersion = 26.1.1;
 					};
 					2285A20F2EF00B47000D512A = {
-						CreatedOnToolsVersion = 26.1.1;
-						TestTargetID = 2285A2022EF00B45000D512A;
-					};
-					2285A2192EF00B47000D512A = {
 						CreatedOnToolsVersion = 26.1.1;
 						TestTargetID = 2285A2022EF00B45000D512A;
 					};
@@ -319,7 +303,6 @@
 			targets = (
 				2285A2022EF00B45000D512A /* Eventorias */,
 				2285A20F2EF00B47000D512A /* EventoriasTests */,
-				2285A2192EF00B47000D512A /* EventoriasUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -342,13 +325,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		2285A2182EF00B47000D512A /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -357,25 +333,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				2285A2362EF01C20000D512A /* Event.swift in Sources */,
+				2285A2D92F0FA911000D512A /* AuthService.swift in Sources */,
 				2285A24E2EF0438F000D512A /* EventCategory.swift in Sources */,
 				2285A24A2EF03FF0000D512A /* AuthViewModel.swift in Sources */,
 				2285A23E2EF0249E000D512A /* EventListViewModel.swift in Sources */,
 				2285A2382EF01CB4000D512A /* User.swift in Sources */,
+				2285A2E02F0FD5EB000D512A /* ImageStorageService.swift in Sources */,
 				2285A2CF2F0D792F000D512A /* LocationHelper.swift in Sources */,
-				2285A27D2EF1D943000D512A /* Service.swift in Sources */,
+				2285A27D2EF1D943000D512A /* EventService.swift in Sources */,
 				2285A2622EF16DAD000D512A /* DIContainer.swift in Sources */,
+				2285A2DC2F0FA948000D512A /* UserService.swift in Sources */,
 				2285A2072EF00B45000D512A /* EventoriasApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		2285A20C2EF00B47000D512A /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		2285A2162EF00B47000D512A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -389,11 +361,6 @@
 			isa = PBXTargetDependency;
 			target = 2285A2022EF00B45000D512A /* Eventorias */;
 			targetProxy = 2285A2112EF00B47000D512A /* PBXContainerItemProxy */;
-		};
-		2285A21C2EF00B47000D512A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 2285A2022EF00B45000D512A /* Eventorias */;
-			targetProxy = 2285A21B2EF00B47000D512A /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -627,46 +594,6 @@
 			};
 			name = Release;
 		};
-		2285A22B2EF00B47000D512A /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = LGULT4TAHU;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.gaby.EventoriasUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Eventorias;
-			};
-			name = Debug;
-		};
-		2285A22C2EF00B47000D512A /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = LGULT4TAHU;
-				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.gaby.EventoriasUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Eventorias;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -693,15 +620,6 @@
 			buildConfigurations = (
 				2285A2282EF00B47000D512A /* Debug */,
 				2285A2292EF00B47000D512A /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		2285A22A2EF00B47000D512A /* Build configuration list for PBXNativeTarget "EventoriasUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				2285A22B2EF00B47000D512A /* Debug */,
-				2285A22C2EF00B47000D512A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

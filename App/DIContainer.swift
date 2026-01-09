@@ -13,13 +13,30 @@ import FirebaseCore
 @Observable
 final class DIContainer {
         
-        let service: EventServiceProtocol
+        // Services
+        let authService: any AuthServiceProtocol
+        let userService: any UserServiceProtocol
+        let eventService: any EventServiceProtocol
+        private let imageStorageService: any ImageStorageServiceProtocol
+        
+        // ViewModels
         let authViewModel: AuthViewModel
         let eventListViewModel: EventListViewModel
         
-        init(service: EventServiceProtocol) {
-                self.service = service
-                self.authViewModel = AuthViewModel(service: service)
-                self.eventListViewModel = EventListViewModel(service: service)
+        init() {
+                
+                self.imageStorageService = ImageStorageService()
+                self.authService = AuthService()
+                self.userService = UserService(imageStorageService: imageStorageService)
+                self.eventService = EventService(imageStorageService: imageStorageService)
+           
+                self.authViewModel = AuthViewModel(
+                        authService: authService,
+                        userService: userService
+                )
+                self.eventListViewModel = EventListViewModel(
+                        eventService: eventService,
+                        authService: authService
+                )
         }
 }
