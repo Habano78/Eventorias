@@ -11,78 +11,112 @@ import Foundation
 @MainActor
 final class MockEventService: EventServiceProtocol {
         
-        nonisolated(unsafe) var mockEvents: [Event] = []
-        nonisolated(unsafe) var shouldReturnError = false
+        // MARK: - State
+        var mockEvents: [Event] = []
+        var shouldReturnError = false
+        
+        // MARK: - Hooks
+        var onFetchEvents: (() -> Void)?
+        var onAddEvent: (() -> Void)?
+        var onDeleteEvent: (() -> Void)?
+        var onEditEvent: (() -> Void)?
+        var onUpdateParticipation: (() -> Void)?
+        var onUploadImage: (() -> Void)?
+        
+        // MARK: - Implementation
         
         func fetchEvents() async throws -> [Event] {
-                if shouldReturnError { throw NSError(domain: "Event", code: 500) }
+                defer { onFetchEvents?() } // 🛡️ Signal de fin
+                
+                if shouldReturnError {
+                        throw NSError(domain: "Mock", code: 500, userInfo: [NSLocalizedDescriptionKey: "Erreur serveur simulée"])
+                }
                 return mockEvents
         }
         
         func addEvent(_ event: Event) async throws {
-                if shouldReturnError { throw NSError(domain: "Event", code: 500) }
+                defer { onAddEvent?() }
+                
+                if shouldReturnError {
+                        throw NSError(domain: "Mock", code: 500)
+                }
                 mockEvents.append(event)
         }
         
         func deleteEvent(eventId: String) async throws {
-                if shouldReturnError { throw NSError(domain: "Event", code: 500) }
+                defer { onDeleteEvent?() }
+                
+                if shouldReturnError {
+                        throw NSError(domain: "Mock", code: 500)
+                }
                 mockEvents.removeAll { $0.id == eventId }
         }
         
-        func editEvent(event: Event, title: String, description: String, date: Date, location: String, category: EventCategory, newImageData: Data?) async throws {
+        func editEvent(event: Event,
+                       title: String,
+                       description: String,
+                       date: Date,
+                       location: String,
+                       category: EventCategory,
+                       newImageData: Data?) async throws {
                 
-                if shouldReturnError { throw NSError(domain: "Event", code: 500) }
+                defer { onEditEvent?() }
                 
-                if let index = mockEvents.firstIndex(where: { $0.id == event.id }) {
-                        let newEvent = Event(
-                                id: event.id,
-                                userId: event.userId,
-                                title: title,
-                                description: description,
-                                date: date,
-                                location: location,
-                                category: category,
-                                attendees: event.attendees,
-                                imageURL: newImageData != nil ? "new_url" : event.imageURL,
-                                latitude: event.latitude,
-                                longitude: event.longitude
-                        )
-                        mockEvents[index] = newEvent
+                if shouldReturnError {
+                        throw NSError(domain: "Mock", code: 500)
                 }
+                
+                guard let index = mockEvents.firstIndex(where: { $0.id == event.id }) else {
+                        return // Ou throw error "Not Found" selon ton besoin
+                }
+                
+                // Simulation logique image : Si nouvelle data, nouvelle URL. Sinon, on garde l'ancienne.
+                let finalImageURL = newImageData != nil ? "https://mock.com/updated_image.jpg" : event.imageURL
+                
+                // 🏗️ Création d'une nouvelle instance (Immuabilité / Best Practice)
+                let updatedEvent = Event(
+                        id: event.id,
+                        userId: event.userId,       // Inchangé
+                        title: title,               // Modifié
+                        description: description,   // Modifié
+                        date: date,                 // Modifié
+                        location: location,         // Modifié
+                        category: category,         // Modifié
+                        attendees: event.attendees, // Inchangé
+                        imageURL: finalImageURL,    // Potentiellement modifié
+                        latitude: event.latitude,   // Inchangé (ou devrait être mis à jour via location ?)
+                        longitude: event.longitude  // Inchangé
+                )
+                
+                mockEvents[index] = updatedEvent
         }
         
         func updateParticipation(eventId: String, userId: String, isJoining: Bool) async throws {
+                defer { onUpdateParticipation?() }
                 
-                if shouldReturnError { throw NSError(domain: "Event", code: 500) }
-                
-                if let index = mockEvents.firstIndex(where: { $0.id == eventId }) {
-                        let oldEvent = mockEvents[index]
-                        var newAttendees = oldEvent.attendees
-                        
-                        if isJoining {
-                                newAttendees.append(userId)
-                        } else {
-                                newAttendees.removeAll { $0 == userId }
-                        }
-                        
-                        let updated = Event(
-                                id: oldEvent.id,
-                                userId: oldEvent.userId,
-                                title: oldEvent.title,
-                                description: oldEvent.description,
-                                date: oldEvent.date,
-                                location: oldEvent.location,
-                                category: oldEvent.category,
-                                attendees: newAttendees,
-                                imageURL: oldEvent.imageURL,
-                                latitude: oldEvent.latitude,
-                                longitude: oldEvent.longitude
-                        )
-                        mockEvents[index] = updated
+                if shouldReturnError {
+                        throw NSError(domain: "Mock", code: 500)
                 }
+                
+                guard let index = mockEvents.firstIndex(where: { $0.id == eventId }) else {
+                        return
+                }
+                
+                let eventToUpdate = mockEvents[index]
+                
+                if isJoining {
+                        if !eventToUpdate.attendees.contains(userId) {
+                                eventToUpdate.attendees.append(userId)
+                        }
+                } else {
+                        eventToUpdate.attendees.removeAll { $0 == userId }
+                }
+                
+                mockEvents[index] = eventToUpdate
         }
         
         func uploadEventImage(data: Data) async throws -> String {
+                defer { onUploadImage?() }
                 if shouldReturnError { throw NSError(domain: "Event", code: 500) }
                 return "https://mock.com/event.jpg"
         }

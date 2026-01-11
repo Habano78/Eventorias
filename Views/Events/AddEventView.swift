@@ -169,7 +169,7 @@ struct AddEventView: View {
                         
                         let imageData = selectedImage?.jpegData(compressionQuality: 0.5)
                         
-                        eventListViewModel.addEvent(
+                        await eventListViewModel.addEvent(
                                 title: title,
                                 description: description,
                                 date: date,

@@ -11,22 +11,40 @@ import Foundation
 @MainActor
 final class MockUserService: UserServiceProtocol {
         
-        //MARK: 
-        nonisolated(unsafe)  var mockUser: User?
-        nonisolated(unsafe) var shouldReturnError = false
+        // MARK: State
+        var mockUser: User?
+        var shouldReturnError = false
         
-        //MARK:
-        nonisolated  func saveUser(_ user: User) async throws {
+        // MARK: - Hooks
+        var onFetchUser: (() -> Void)?
+        var onSaveUser: (() -> Void)?
+        var onUploadImage: (() -> Void)?
+        
+        
+        // MARK: Implementation
+        
+        func saveUser(_ user: User) async throws {
+                defer { onSaveUser?() } // 🛡️ Sera appelé même si erreur ligne suivante
+                
                 if shouldReturnError { throw NSError(domain: "User", code: 500) }
-                self.mockUser = user
+                
+                mockUser = user
         }
         
-        nonisolated func fetchUser(userId: String) async throws -> User? {
+        func fetchUser(userId: String) async throws -> User? {
+                defer { onFetchUser?() } // 🛡️
+                
                 if shouldReturnError { throw NSError(domain: "User", code: 404) }
+                
                 return mockUser
         }
         
-        nonisolated func uploadProfileImage(data: Data) async throws -> String {
+        func uploadProfileImage(data: Data) async throws -> String {
+                defer { onUploadImage?() } // 🛡️
+                
+                // J'ai ajouté la simulation d'erreur ici aussi
+                if shouldReturnError { throw NSError(domain: "User", code: 500) }
+                
                 return "https://mock-storage.com/avatar.jpg"
         }
 }

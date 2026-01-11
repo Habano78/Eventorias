@@ -85,7 +85,9 @@ struct EditEventView: View {
                                 }
                                 ToolbarItem(placement: .confirmationAction) {
                                         Button("Enregistrer") {
-                                                saveChanges()
+                                                Task {
+                                                        await saveChanges()
+                                                }
                                         }
                                         .disabled(title.isEmpty)
                                         .accessibilityLabel("Sauvegarder les modifications")
@@ -109,10 +111,10 @@ struct EditEventView: View {
                 }
         }
         
-        private func saveChanges() {
+        private func saveChanges() async {
                 let newImageData = selectedImage?.jpegData(compressionQuality: 0.5)
                 
-                eventListViewModel.editEvent(
+                await eventListViewModel.editEvent(
                         event: event,
                         title: title,
                         description: description,

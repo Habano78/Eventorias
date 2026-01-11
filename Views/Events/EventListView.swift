@@ -86,7 +86,9 @@ struct EventListView: View {
                                 AddEventView()
                         }
                         .onAppear {
-                                viewModel.loadEventsIfNeeded()
+                                Task {
+                                        await viewModel.loadEventsIfNeeded()
+                                }
                         }
                 }
                 .preferredColorScheme(.dark)

@@ -57,7 +57,7 @@ struct EventMapView: View {
                                         MapScaleView()
                                 }
                                 .task {
-                                        viewModel.loadEventsIfNeeded()
+                                        await viewModel.loadEventsIfNeeded()
                                 }
                                 .sheet(item: $selectedEvent) { event in
                                         NavigationStack {

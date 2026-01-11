@@ -155,7 +155,10 @@ struct ProfileView: View {
                                                                 .accessibilityHint("Active ou désactive les notifications push")
                                                         
                                                         Button {
-                                                                saveProfileChanges()
+                                                                Task {
+                                                                        await saveProfileChanges()
+                                                                }
+                                                                
                                                         } label: {
                                                                 Text("Enregistrer les modifications")
                                                                         .foregroundStyle(.blue)
@@ -195,8 +198,8 @@ struct ProfileView: View {
         
         // MARK: Helper Functions
         
-        private func saveProfileChanges() {
-                authViewModel.updateProfile(
+        private func saveProfileChanges() async {
+                await authViewModel.updateProfile(
                         name: name,
                         isNotifEnabled: isNotificationsEnabled,
                         image: selectedImage
@@ -204,12 +207,11 @@ struct ProfileView: View {
         }
         
         private func deleteEvents(at indexSet: IndexSet) {
-                
                 let eventsToDelete = indexSet.map { myCreatedEvents[$0] }
-                
-                for event in eventsToDelete {
-                        withAnimation {
-                                eventListViewModel.deleteEvent(event)
+        
+                Task {
+                        for event in eventsToDelete {
+                                await eventListViewModel.deleteEvent(event)
                         }
                 }
         }

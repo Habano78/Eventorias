@@ -50,15 +50,12 @@ struct EventDetailView: View {
                         // Adaptation Ipad/Iphone
                         if sizeClass == .regular {
                                 HStack(alignment: .top, spacing: 30) {
-                                        
-                                        // COLONNE GAUCHE (Visuels)
                                         VStack(spacing: 20) {
                                                 mainImageSection
                                                 mapSection
                                         }
                                         .frame(maxWidth: .infinity)
                                         
-                                        // COLONNE DROITE (Infos)
                                         VStack(alignment: .leading, spacing: 20) {
                                                 headerInfoSection
                                                 Divider().background(Color.gray)
@@ -67,10 +64,10 @@ struct EventDetailView: View {
                                         }
                                         .frame(maxWidth: .infinity)
                                 }
-                                .padding(30) // Plus de marge sur iPad
+                                .padding(30)
                                 
                         } else {
-                                // LAYOUT IPHONE (VStack Classique)
+                                // IPHONE
                                 VStack(alignment: .leading, spacing: 20) {
                                         mainImageSection
                                         headerInfoSection
@@ -122,7 +119,7 @@ struct EventDetailView: View {
                                 Image(event.category.assetName).resizable().aspectRatio(contentMode: .fill)
                         }
                 }
-                .frame(height: sizeClass == .regular ? 400 : 300) // Plus grand sur iPad
+                .frame(height: sizeClass == .regular ? 400 : 300)
                 .frame(minWidth: 0, maxWidth: .infinity)
                 .clipped()
                 .clipShape(RoundedRectangle(cornerRadius: 24))
@@ -149,7 +146,7 @@ struct EventDetailView: View {
                                 .accessibilityElement(children: .combine)
                                 .accessibilityLabel("Heure : \(event.date.formatted(date: .omitted, time: .shortened))")
                         }
-                        .font(sizeClass == .regular ? .title3 : .subheadline) // Plus gros sur iPad
+                        .font(sizeClass == .regular ? .title3 : .subheadline)
                         
                         Spacer()
                         
@@ -195,8 +192,8 @@ struct EventDetailView: View {
                         Button {
                                 let generator = UIImpactFeedbackGenerator(style: .medium)
                                 generator.impactOccurred()
-                                withAnimation(.spring(response: 0.4, dampingFraction: 0.6)) {
-                                        eventListViewModel.toggleParticipation(event: event)
+                                Task {
+                                        await eventListViewModel.toggleParticipation(event: event)
                                 }
                         } label: {
                                 HStack(spacing: 6) {

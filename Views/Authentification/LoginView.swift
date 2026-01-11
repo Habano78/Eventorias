@@ -57,10 +57,12 @@ struct LoginView: View {
                                 }
                                 
                                 Button {
-                                        if isLoginMode {
-                                                authViewModel.signIn(email: email, password: password)
-                                        } else {
-                                                authViewModel.signUp(email: email, password: password)
+                                        Task {
+                                                if isLoginMode {
+                                                        await authViewModel.signIn(email: email, password: password)
+                                                } else {
+                                                        await authViewModel.signUp(email: email, password: password)
+                                                }
                                         }
                                 } label: {
                                         Text(isLoginMode ? "Se connecter" : "Créer un compte")
