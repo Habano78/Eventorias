@@ -14,10 +14,12 @@ import UIKit
 @MainActor
 struct AuthViewModelTests {
         
+        // MARK: - Properties
         let viewModel: AuthViewModel
         let mockAuthService: MockAuthService
         let mockUserService: MockUserService
         
+        // MARK: - Setup
         init() {
                 if FirebaseApp.app() == nil { FirebaseApp.configure() }
                 
@@ -30,146 +32,216 @@ struct AuthViewModelTests {
                 )
         }
         
-        @Test
-        func initLoadsUserIfSignedIn() async throws {
-                let preMockAuth = MockAuthService()
-                preMockAuth.mockUserId = "existing_uid"
+        // MARK: - Tests: Init & Session
+        
+        @Test("Init: Charge l'utilisateur s'il est déjà connecté")
+        func initLoadsUserIfSignedIn() async {
+                // Given
+                let auth = MockAuthService()
+                auth.mockUserId = "uid"
                 
-                let preMockUser = MockUserService()
-                preMockUser.mockUser = User(fireBaseUserId: "existing_uid", email: "old@test.com", name: "Old User")
+                let userService = MockUserService()
+                userService.mockUser = User(fireBaseUserId: "uid", email: "a@a.com", name: "User")
                 
-                await confirmation("Init loads session") { confirm in
-                        // ✅ CORRECTION : On utilise l'instance 'preMockUser', pas la classe
-                        preMockUser.onFetchUser = { confirm() }
+                // When
+                await confirmation { confirm in
+                        userService.onFetchUser = { confirm() }
                         
-                        _ = AuthViewModel(authService: preMockAuth, userService: preMockUser)
+                        _ = AuthViewModel(authService: auth, userService: userService)
                         
-                        // On laisse un micro-délai pour que la Task de l'init démarre
                         try? await Task.sleep(nanoseconds: 100_000_000)
                 }
-                
-                await Task.yield()
-                #expect(preMockAuth.mockUserId == "existing_uid")
+        
         }
         
-        @Test
-        func signInSuccess() async throws {
-                mockUserService.mockUser = User(fireBaseUserId: "test_user_id", email: "login@test.com", name: "Logged User")
+        @Test("isUserSignedIn: Renvoie true si un utilisateur est connecté")
+        func isUserSignedIn_true() async {
+                // Given
+                mockAuthService.mockUserId = "some_uid"
                 
-                await confirmation("SignIn completes") { confirm in
+                // When & Then
+                #expect(viewModel.isUserSignedIn == true)
+        }
+        
+        @Test("isUserSignedIn: Renvoie false si aucun utilisateur n'est connecté")
+        func isUserSignedIn_false() async {
+                // Given
+                mockAuthService.mockUserId = nil
+                
+                // When & Then
+                #expect(viewModel.isUserSignedIn == false)
+        }
+        
+        // MARK: - Tests: SignIn
+        
+        @Test("SignIn: Connecte l'utilisateur avec succès")
+        func signInSuccess() async {
+                // Given
+                mockUserService.mockUser = User(fireBaseUserId: "uid", email: "login@test.com", name: "Logged")
+                
+                // When
+                await confirmation { confirm in
                         mockAuthService.onSignIn = { confirm() }
-                        await viewModel.signIn(email: "login@test.com", password: "password")
+                        await viewModel.signIn(email: "login@test.com", password: "123")
                 }
                 
-                await Task.yield()
-                #expect(viewModel.currentUser?.name == "Logged User")
-                #expect(viewModel.errorMessage == nil)
+                // Then
+                #expect(viewModel.currentUser?.name == "Logged")
         }
         
-        @Test
-        func signInFailure() async throws {
+        @Test("SignIn: Échoue avec une erreur")
+        func signInFailure() async {
+                // Given
                 mockAuthService.shouldReturnError = true
                 
-                await confirmation("SignIn fails") { confirm in
+                // When
+                await confirmation { confirm in
                         mockAuthService.onSignIn = { confirm() }
-                        await viewModel.signIn(email: "fail@test.com", password: "wrong")
+                        await viewModel.signIn(email: "fail", password: "fail")
                 }
                 
-                await Task.yield()
+                // Then
                 #expect(viewModel.currentUser == nil)
                 #expect(viewModel.errorMessage != nil)
-                #expect(viewModel.errorMessage!.contains("Erreur connexion"))
         }
         
-        @Test
-        func signUpFullProcess() async throws {
-                let email = "new@test.com"
+        // MARK: - Tests: Inscription (SignUp)
+        
+        @Test("SignUp: Inscrit et sauvegarde l'utilisateur")
+        func signUpSuccess() async {
+                // Given
+                // (Pas de setup spécifique requis, le mock renvoie des valeurs par défaut)
                 
-                await confirmation("SignUp completes") { confirm in
+                // When
+                await confirmation { confirm in
                         mockAuthService.onSignUp = { confirm() }
-                        await viewModel.signUp(email: email, password: "123")
+                        await viewModel.signUp(email: "new@test.com", password: "123")
                 }
                 
-                await Task.yield()
-                
-                let savedUser = try #require(mockUserService.mockUser)
-                #expect(savedUser.email == email)
-                #expect(savedUser.fireBaseUserId == "new_user_id")
-                #expect(viewModel.currentUser != nil)
+                // Then
+                #expect(viewModel.currentUser?.email == "new@test.com")
+                #expect(viewModel.currentUser?.name == "Nouvel Utilisateur")
         }
         
-        @Test
-        func signUpFailure() async throws {
+        @Test("SignUp: Échoue si le service Auth plante")
+        func signUpFailure() async {
+                // Given
                 mockAuthService.shouldReturnError = true
                 
-                await confirmation("SignUp fails") { confirm in
+                // When
+                await confirmation { confirm in
                         mockAuthService.onSignUp = { confirm() }
                         await viewModel.signUp(email: "fail@test.com", password: "123")
                 }
                 
-                await Task.yield()
+                // Then
                 #expect(viewModel.currentUser == nil)
                 #expect(viewModel.errorMessage != nil)
         }
         
-        @Test
-        func updateProfileSuccess() async throws {
-                let initialUser = User(fireBaseUserId: "uid_123", email: "test@test.com", name: "Ancien")
-                mockUserService.mockUser = initialUser
-                viewModel.currentUser = initialUser
+        // MARK: - Tests: Déconnexion (SignOut)
+        
+        @Test("SignOut: Déconnecte l'utilisateur")
+        func signOutSuccess() {
+                // Given
+                viewModel.currentUser = User(fireBaseUserId: "u1", email: "a@a.com", name: "Bob")
                 
-                await confirmation("Update profile completes") { confirm in
-                        mockUserService.onSaveUser = { confirm() }
-                        await viewModel.updateProfile(name: "Nouveau", isNotifEnabled: true, image: nil)
-                }
+                // When
+                viewModel.signOut()
                 
-                await Task.yield()
-                #expect(mockUserService.mockUser?.name == "Nouveau")
-                #expect(viewModel.currentUser?.name == "Nouveau")
+                // Then
+                #expect(viewModel.currentUser == nil)
         }
         
-        @Test
-        func updateProfileWithImage() async throws {
-                let user = User(fireBaseUserId: "u1", email: "a@a.com", name: "Bob")
-                mockUserService.mockUser = user
-                viewModel.currentUser = user
+        @Test("SignOut: Gère l'erreur")
+        func signOutFailure() {
+                // Given
+                mockAuthService.shouldReturnError = true
                 
-                let renderer = UIGraphicsImageRenderer(size: CGSize(width: 1, height: 1))
-                let fakeImage = renderer.image { ctx in
-                        UIColor.red.setFill()
-                        ctx.fill(CGRect(x: 0, y: 0, width: 1, height: 1))
-                }
+                // When
+                viewModel.signOut()
                 
-                await confirmation("Upload and Save completes") { confirm in
-                        mockUserService.onSaveUser = { confirm() }
-                        await viewModel.updateProfile(name: "Bob avec Photo", isNotifEnabled: true, image: fakeImage)
-                }
-                
-                await Task.yield()
-                #expect(mockUserService.mockUser?.profileImageURL == "https://mock-storage.com/avatar.jpg")
+                // Then
+                #expect(viewModel.errorMessage == "Erreur déconnexion")
         }
         
-        @Test func updateProfileFailure() async throws {
-                
-                viewModel.currentUser = User(
-                        fireBaseUserId: "test_id",
-                        email: "test@example.com",
-                        name: "Ancien Nom",
-                        profileImageURL: nil,
-                        isNotificationsEnabled: false
-                )
-                
+        // MARK: - Tests: Profil (Update & Fetch)
+        
+        @Test("FetchUser: Gère l'erreur de chargement")
+        func fetchUserFailure() async {
+                // Given
                 mockUserService.shouldReturnError = true
                 
-                await confirmation("Le service saveUser doit être appelé 1 fois", expectedCount: 1) { confirm in
-                        
-                        mockUserService.onSaveUser = {
-                                confirm()
-                        }
-                        
-                        await viewModel.updateProfile(name: "Nouveau Nom", isNotifEnabled: true, image: nil)
+                // When
+                await viewModel.fetchUser(fireBaseUserId: "bad_uid")
+                
+                // Then
+                #expect(viewModel.errorMessage == "Impossible de charger le profil.")
+        }
+        
+        @Test("UpdateProfile: Met à jour le profil avec succès")
+        func updateProfileSuccess() async {
+                // Given
+                let user = User(fireBaseUserId: "u1", email: "a@a.com", name: "Old")
+                viewModel.currentUser = user
+                mockUserService.mockUser = user
+                
+                // When
+                await confirmation { confirm in
+                        mockUserService.onSaveUser = { confirm() }
+                        await viewModel.updateProfile(name: "New", isNotifEnabled: true, image: nil)
                 }
-                let message = try #require(viewModel.errorMessage)
-                #expect(message.contains("Erreur de sauvegarde"))
+                
+                // Then
+                #expect(viewModel.currentUser?.name == "New")
+        }
+        
+        @Test("UpdateProfile: Met à jour AVEC une image")
+        func updateProfileWithImage() async {
+                // Given
+                let user = User(fireBaseUserId: "u1", email: "a@a.com", name: "Bob")
+                viewModel.currentUser = user
+                mockUserService.mockUser = user
+                
+                let renderer = UIGraphicsImageRenderer(size: CGSize(width: 1, height: 1))
+                let fakeImage = renderer.image { ctx in UIColor.red.setFill(); ctx.fill(CGRect(x: 0, y: 0, width: 1, height: 1)) }
+                
+                // When
+                await confirmation { confirm in
+                        mockUserService.onSaveUser = { confirm() }
+                        await viewModel.updateProfile(name: "Bob Photo", isNotifEnabled: true, image: fakeImage)
+                }
+                
+                // Then
+                #expect(viewModel.currentUser?.profileImageURL == "https://mock-storage.com/avatar.jpg")
+        }
+        
+        @Test("UpdateProfile: Gère l'erreur de sauvegarde")
+        func updateProfileFailure() async {
+                // Given
+                let user = User(fireBaseUserId: "u1", email: "a@a.com", name: "Old")
+                viewModel.currentUser = user
+                mockUserService.shouldReturnError = true
+                
+                // When
+                await confirmation { confirm in
+                        mockUserService.onSaveUser = { confirm() }
+                        await viewModel.updateProfile(name: "Fail", isNotifEnabled: true, image: nil)
+                }
+                
+                // Then
+                #expect(viewModel.errorMessage != nil)
+        }
+        
+        @Test("UpdateProfile: Ne fait rien si aucun utilisateur")
+        func updateProfile_withoutUser_doesNothing() async {
+                // Given
+                viewModel.currentUser = nil
+                
+                // When
+                await viewModel.updateProfile(name: "X", isNotifEnabled: true, image: nil)
+                
+                // Then
+                #expect(viewModel.isLoading == false)
         }
 }

@@ -24,7 +24,7 @@ final class MockUserService: UserServiceProtocol {
         // MARK: Implementation
         
         func saveUser(_ user: User) async throws {
-                defer { onSaveUser?() } // 🛡️ Sera appelé même si erreur ligne suivante
+                defer { onSaveUser?() }
                 
                 if shouldReturnError { throw NSError(domain: "User", code: 500) }
                 
@@ -32,7 +32,7 @@ final class MockUserService: UserServiceProtocol {
         }
         
         func fetchUser(userId: String) async throws -> User? {
-                defer { onFetchUser?() } // 🛡️
+                defer { onFetchUser?() }
                 
                 if shouldReturnError { throw NSError(domain: "User", code: 404) }
                 
@@ -40,9 +40,8 @@ final class MockUserService: UserServiceProtocol {
         }
         
         func uploadProfileImage(data: Data) async throws -> String {
-                defer { onUploadImage?() } // 🛡️
+                defer { onUploadImage?() }
                 
-                // J'ai ajouté la simulation d'erreur ici aussi
                 if shouldReturnError { throw NSError(domain: "User", code: 500) }
                 
                 return "https://mock-storage.com/avatar.jpg"

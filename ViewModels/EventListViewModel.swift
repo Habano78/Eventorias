@@ -50,19 +50,18 @@ class EventListViewModel {
                 isLoading = false
         }
         
-        func loadEventsIfNeeded() async { // ✅ Devenu async
+        func loadEventsIfNeeded() async {
                 if events.isEmpty {
-                        await fetchEvents() // ✅ Plus de Task ici, on attend directement
+                        await fetchEvents()
                 }
         }
         
         // MARK: Écriture -Add, Edit, Delete
         
-        func addEvent(title: String, description: String, date: Date, location: String, category: EventCategory, latitude: Double, longitude: Double, newImageData: Data?) async { // ✅ async ajouté
+        func addEvent(title: String, description: String, date: Date, location: String, category: EventCategory, latitude: Double, longitude: Double, newImageData: Data?) async {
                 guard let uid = currentUserId else { return }
                 isLoading = true
                 
-                // ❌ Task retirée
                 do {
                         var imageURL: String? = nil
                         if let imageData = newImageData {
@@ -92,9 +91,9 @@ class EventListViewModel {
                 isLoading = false
         }
         
-        func editEvent(event: Event, title: String, description: String, date: Date, location: String, category: EventCategory, newImageData: Data?) async { 
+        func editEvent(event: Event, title: String, description: String, date: Date, location: String, category: EventCategory, newImageData: Data?) async {
                 self.isLoading = true
-                // ❌ Task retirée
+                
                 do {
                         try await eventService.editEvent(
                                 event: event,
@@ -124,7 +123,7 @@ class EventListViewModel {
                 guard let index = events.firstIndex(where: { $0.id == event.id }) else { return }
                 
                 events.remove(at: index)
-          
+                
                 do {
                         try await eventService.deleteEvent(eventId: event.id)
                         cancelNotification(for: event)
@@ -159,7 +158,7 @@ class EventListViewModel {
                         cancelNotification(for: liveEvent)
                 }
                 events[index].attendees = updatedAttendees
-               
+                
                 do {
                         try await eventService.updateParticipation(eventId: liveEvent.id, userId: currentUserId, isJoining: isJoining)
                 } catch {

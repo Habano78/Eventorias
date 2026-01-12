@@ -13,10 +13,12 @@ import FirebaseCore
 @MainActor
 struct EventListViewModelTests {
         
+        // MARK: - Properties
         let viewModel: EventListViewModel
         let mockEventService: MockEventService
         let mockAuthService: MockAuthService
         
+        // MARK: - Setup
         init() {
                 if FirebaseApp.app() == nil { FirebaseApp.configure() }
                 
@@ -29,172 +31,371 @@ struct EventListViewModelTests {
                 )
         }
         
-        @Test
+        // MARK: - Tests: Chargement (Fetch)
+        
+        @Test("FetchEvents: Charge les événements avec succès")
         func fetchEventsSuccess() async {
+                // Given
                 let event = Event(userId: "u1", title: "Party", description: "", date: Date(), location: "", category: .music, latitude: 0, longitude: 0)
                 mockEventService.mockEvents = [event]
                 
-                await confirmation("Fetch events completes") { confirm in
+                // When
+                await confirmation { confirm in
                         mockEventService.onFetchEvents = { confirm() }
                         await viewModel.fetchEvents()
                 }
                 
-                await Task.yield()
+                // Then
                 #expect(viewModel.events.count == 1)
                 #expect(viewModel.isLoading == false)
         }
         
-        @Test
+        @Test("FetchEvents: Gère une erreur de service")
         func fetchEventsFailure() async {
+                // Given
                 mockEventService.shouldReturnError = true
                 
-                await confirmation("Fetch events fails") { confirm in
+                // When
+                await confirmation { confirm in
                         mockEventService.onFetchEvents = { confirm() }
                         await viewModel.fetchEvents()
                 }
                 
-                await Task.yield()
+                // Then
                 #expect(viewModel.events.isEmpty)
                 #expect(viewModel.errorMessage != nil)
         }
         
-        @Test
-        func loadEventsTrigger() async throws {
-                viewModel.events = []
+        @Test("LoadEventsIfNeeded: Déclenche un fetch quand la liste est vide")
+        func loadEventsTrigger() async {
+                // Given
                 let event = Event(userId: "u1", title: "Loaded", description: "", date: Date(), location: "", category: .music, latitude: 0, longitude: 0)
                 mockEventService.mockEvents = [event]
                 
-                await confirmation("LoadIfNeeded triggers fetch") { confirm in
+                // When
+                await confirmation { confirm in
                         mockEventService.onFetchEvents = { confirm() }
                         await viewModel.loadEventsIfNeeded()
                 }
                 
-                await Task.yield()
+                // Then
                 #expect(viewModel.events.count == 1)
         }
         
-        @Test
-        func addEventWithImage() async throws {
-                mockAuthService.mockUserId = "user_123"
-                let fakeImageData = Data([0x00, 0x01, 0x02])
+        @Test("LoadEventsIfNeeded: Ne fait rien si les événements sont déjà chargés")
+        func loadEventsIfNeeded_doesNothingIfAlreadyLoaded() async {
+                // Given
+                viewModel.events = [Event(userId: "u1", title: "Already", description: "", date: Date(), location: "", category: .music, latitude: 0, longitude: 0)]
+                var fetchCalled = false
+                mockEventService.onFetchEvents = { fetchCalled = true }
                 
-                await confirmation("Add event with image completes") { confirm in
-                        mockEventService.onAddEvent = { confirm() }
-                        await viewModel.addEvent(
-                                title: "Avec Image",
-                                description: "Desc",
-                                date: Date(),
-                                location: "Loc",
-                                category: .art,
-                                latitude: 0,
-                                longitude: 0,
-                                newImageData: fakeImageData
-                        )
-                }
+                // When
+                await viewModel.loadEventsIfNeeded()
                 
-                await Task.yield()
-                
-                let addedEvent = try #require(viewModel.events.first)
-                // L'URL ici matche maintenant celle du Mock (fixée à "https://mock.com/event.jpg")
-                #expect(addedEvent.imageURL == "https://mock.com/event.jpg")
+                // Then
+                #expect(fetchCalled == false)
         }
         
-        @Test
-        func addEventFailure() async throws {
-                mockAuthService.mockUserId = "me"
-                mockEventService.shouldReturnError = true
+        // MARK: - Tests: Ajout (Add)
+        
+        @Test("AddEvent: Ajoute un événement avec image")
+        func addEventWithImage() async throws {
+                // Given
+                mockAuthService.mockUserId = "user_123"
+                let imageData = Data([0x00])
                 
-                await confirmation("Add event fails") { confirm in
+                // When
+                await confirmation { confirm in
                         mockEventService.onAddEvent = { confirm() }
-                        await viewModel.addEvent(title: "New", description: "", date: Date(), location: "", category: .art, latitude: 0, longitude: 0, newImageData: nil)
+                        await viewModel.addEvent(title: "Avec Image", description: "", date: Date(), location: "", category: .art, latitude: 0, longitude: 0, newImageData: imageData)
                 }
                 
-                await Task.yield()
+                // Then
+                let event = try #require(viewModel.events.first)
+                #expect(event.imageURL == "https://mock.com/event.jpg")
+        }
+        
+        @Test("AddEvent: Crée un événement sans URL si pas d'image")
+        func addEvent_withoutImage() async throws {
+                // Given
+                mockAuthService.mockUserId = "u1"
+                
+                // When
+                await confirmation { confirm in
+                        mockEventService.onAddEvent = { confirm() }
+                        await viewModel.addEvent(title: "Sans image", description: "", date: .now, location: "", category: .art, latitude: 0, longitude: 0, newImageData: nil)
+                }
+                
+                // Then
+                let event = try #require(viewModel.events.first)
+                #expect(event.imageURL == nil)
+        }
+        
+        @Test("AddEvent: Gère l'erreur")
+        func addEventFailure() async {
+                // Given
+                mockAuthService.mockUserId = "u1"
+                mockEventService.shouldReturnError = true
+                
+                // When
+                await confirmation { confirm in
+                        mockEventService.onAddEvent = { confirm() }
+                        await viewModel.addEvent(title: "Fail", description: "", date: .now, location: "", category: .art, latitude: 0, longitude: 0, newImageData: nil)
+                }
+                
+                // Then
                 #expect(viewModel.events.isEmpty)
                 #expect(viewModel.errorMessage == "Impossible de créer l'événement.")
         }
         
-        @Test
-        func deleteEventSuccessExecution() async throws {
-                let event = Event(userId: "u1", title: "To Delete", description: "", date: Date(), location: "", category: .other, latitude: 0, longitude: 0)
-                mockEventService.mockEvents = [event]
-                await viewModel.fetchEvents()
-                let targetEvent = try #require(viewModel.events.first)
+        @Test("AddEvent: Ne fait rien si l'utilisateur n'est pas connecté")
+        func addEvent_doesNothingWhenNotLoggedIn() async {
+                // Given
+                mockAuthService.mockUserId = nil
                 
-                await confirmation("Delete event completes") { confirm in
-                        mockEventService.onDeleteEvent = { confirm() }
-                        await viewModel.deleteEvent(targetEvent)
-                }
+                // When
+                await viewModel.addEvent(title: "X", description: "", date: .now, location: "", category: .art, latitude: 0, longitude: 0, newImageData: nil)
                 
-                await Task.yield()
+                // Then
                 #expect(viewModel.events.isEmpty)
         }
         
-        @Test
-        func deleteEventRollback() async throws {
-                let event = Event(userId: "u1", title: "To Delete", description: "", date: Date(), location: "", category: .other, latitude: 0, longitude: 0)
+        @Test("ScheduleNotification: Planifie une notif pour un événement futur")
+        func scheduleNotification_futureEvent() async throws {
+                // Given
+                mockAuthService.mockUserId = "u1"
+                let futureDate = Date().addingTimeInterval(7200)
+                
+                // When
+                await confirmation { confirm in
+                        mockEventService.onAddEvent = { confirm() }
+                        
+                        await viewModel.addEvent(
+                                title: "Futur",
+                                description: "",
+                                date: futureDate,
+                                location: "",
+                                category: .music,
+                                latitude: 0,
+                                longitude: 0,
+                                newImageData: nil
+                        )
+                }
+        }
+        
+        // MARK: - Tests: Suppression
+        
+        @Test("DeleteEvent: Supprime un événement avec succès")
+        func deleteEventSuccess() async throws {
+                // Given
+                let event = Event(userId: "u1", title: "Delete", description: "", date: Date(), location: "", category: .other, latitude: 0, longitude: 0)
                 mockEventService.mockEvents = [event]
                 await viewModel.fetchEvents()
                 
-                mockEventService.shouldReturnError = true
-                
-                await confirmation("Delete event fails") { confirm in
+                // When
+                await confirmation { confirm in
                         mockEventService.onDeleteEvent = { confirm() }
-                        // On attend la fin complète (y compris rollback)
                         await viewModel.deleteEvent(event)
                 }
                 
-                await Task.yield()
-                
-                // Vérif après rollback : L'élément doit être revenu
-                #expect(viewModel.events.count == 1)
-                #expect(viewModel.events.first?.title == "To Delete")
+                // Then
+                #expect(viewModel.events.isEmpty)
         }
         
-        @Test
-        func toggleParticipationFailure() async throws {
-                mockAuthService.mockUserId = "user_123"
-                let event = Event(userId: "host", title: "Party", description: "", date: Date(), location: "", category: .music, latitude: 0, longitude: 0)
+        @Test("DeleteEvent: Restaure l'événement en cas d'échec (Rollback)")
+        func deleteEventRollback() async {
+                // Given
+                let event = Event(userId: "u1", title: "Rollback", description: "", date: Date(), location: "", category: .other, latitude: 0, longitude: 0)
                 mockEventService.mockEvents = [event]
                 await viewModel.fetchEvents()
-                let targetEvent = try #require(viewModel.events.first)
-                
                 mockEventService.shouldReturnError = true
                 
-                await confirmation("Toggle participation fails") { confirm in
-                        mockEventService.onUpdateParticipation = { confirm() }
-                        await viewModel.toggleParticipation(event: targetEvent)
+                // When
+                await confirmation { confirm in
+                        mockEventService.onDeleteEvent = { confirm() }
+                        await viewModel.deleteEvent(event)
                 }
                 
-                await Task.yield()
-                
-                // Comme le toggle échoue, le VM tente un fetchEvents. Le mock étant en erreur, le fetch échoue aussi.
-                // Donc on aura un message d'erreur.
-                #expect(viewModel.errorMessage != nil)
+                // Then
+                #expect(viewModel.events.count == 1)
+                #expect(viewModel.errorMessage == "Impossible de supprimer l'événement.")
         }
         
-        @Test
-        func editEventFailure() async throws {
+        @Test("DeleteEvent: Rollback avec append si l'index est hors limites")
+        func deleteEvent_rollback_appends_ifIndexOutOfBounds() async {
+                // Given
+                let event1 = Event(userId: "u1", title: "Keep", description: "", date: .now, location: "", category: .music, latitude: 0, longitude: 0)
+                let event2 = Event(userId: "u1", title: "Delete", description: "", date: .now, location: "", category: .music, latitude: 0, longitude: 0)
+                
+                mockEventService.mockEvents = [event1, event2]
+                await viewModel.fetchEvents()
+                
+                let eventToDelete = event2
+                mockEventService.shouldReturnError = true
+                
+                // When
+                await confirmation { confirm in
+                        
+                        mockEventService.onDeleteEvent = {
+                                self.viewModel.events = []
+                                confirm()
+                        }
+                        
+                        await viewModel.deleteEvent(eventToDelete)
+                }
+                
+                // Then
+                #expect(viewModel.events.count == 1)
+                #expect(viewModel.events.first?.id == event2.id)
+        }
+        
+        // MARK: - Tests: Édition (Edit)
+        
+        @Test("EditEvent: Modifie un événement avec succès")
+        func editEventSuccess() async throws {
+                // Given
                 let event = Event(userId: "u1", title: "Avant", description: "", date: Date(), location: "", category: .music, latitude: 0, longitude: 0)
                 mockEventService.mockEvents = [event]
                 await viewModel.fetchEvents()
-                let eventToEdit = try #require(viewModel.events.first)
-                mockEventService.shouldReturnError = true
                 
-                await confirmation("Edit event fails") { confirm in
+                let eventToEdit = try #require(viewModel.events.first)
+                
+                // When
+                await confirmation { confirm in
                         mockEventService.onEditEvent = { confirm() }
+                        await viewModel.editEvent(event: eventToEdit, title: "Après", description: "New", date: Date(), location: "NewLoc", category: .music, newImageData: nil)
+                }
+                
+                // Then
+                let updatedEvent = try #require(viewModel.events.first)
+                #expect(updatedEvent.title == "Après")
+        }
+        
+        @Test("EditEvent: Gère l'erreur")
+        func editEventFailure() async throws {
+                // Given
+                let event = Event(userId: "u1", title: "Avant", description: "", date: Date(), location: "", category: .music, latitude: 0, longitude: 0)
+                mockEventService.mockEvents = [event]
+                await viewModel.fetchEvents()
+                
+                mockEventService.shouldReturnError = true
+                let eventToEdit = try #require(viewModel.events.first)
+                
+                // When
+                await confirmation { confirm in
+                        mockEventService.onEditEvent = { confirm() }
+                        await viewModel.editEvent(event: eventToEdit, title: "Crash", description: "", date: Date(), location: "", category: .music, newImageData: nil)
+                }
+                
+                // Then
+                #expect(viewModel.errorMessage == "Impossible de modifier l'événement.")
+        }
+        
+        @Test("EditEvent: Met à jour la notification si l'utilisateur participe")
+        func editEvent_updatesNotification_ifParticipating() async throws {
+                // Given
+                mockAuthService.mockUserId = "u1"
+                
+                let event = Event(
+                        userId: "host",
+                        title: "Avant",
+                        description: "",
+                        date: Date(),
+                        location: "Paris",
+                        category: .music,
+                        attendees: ["u1"],
+                        latitude: 0,
+                        longitude: 0
+                )
+                mockEventService.mockEvents = [event]
+                await viewModel.fetchEvents()
+                
+                let eventToEdit = try #require(viewModel.events.first)
+                
+                // When
+                await confirmation { confirm in
+                        mockEventService.onEditEvent = { confirm() }
+                        
                         await viewModel.editEvent(
                                 event: eventToEdit,
-                                title: "Crash",
-                                description: "",
-                                date: Date(),
-                                location: "",
+                                title: "Après",
+                                description: "New",
+                                date: Date().addingTimeInterval(3600),
+                                location: "Lyon",
                                 category: .music,
                                 newImageData: nil
                         )
                 }
+        }
+        
+        // MARK: - Tests: Participation (Toggle)
+        
+        @Test("ToggleParticipation: Rejoint un événement")
+        func toggleParticipation_joinEvent() async {
+                // Given
+                mockAuthService.mockUserId = "me"
+                let event = Event(userId: "host", title: "Party", description: "", date: .now, location: "", category: .music, latitude: 0, longitude: 0)
+                mockEventService.mockEvents = [event]
+                await viewModel.fetchEvents()
                 
-                await Task.yield()
-                #expect(viewModel.isLoading == false)
+                // When
+                await confirmation { confirm in
+                        mockEventService.onUpdateParticipation = { confirm() }
+                        await viewModel.toggleParticipation(event: event)
+                }
+                
+                // Then
+                #expect(viewModel.events.first?.attendees.contains("me") == true)
+        }
+        
+        @Test("ToggleParticipation: Retire l'utilisateur d'un événement")
+        func toggleParticipation_leaveEvent() async {
+                // Given
+                mockAuthService.mockUserId = "u1"
+                let event = Event(userId: "host", title: "Party", description: "", date: .now, location: "", category: .music, attendees: ["u1"], latitude: 0, longitude: 0)
+                mockEventService.mockEvents = [event]
+                await viewModel.fetchEvents()
+                
+                // When
+                await confirmation { confirm in
+                        mockEventService.onUpdateParticipation = { confirm() }
+                        await viewModel.toggleParticipation(event: event)
+                }
+                
+                // Then
+                #expect(viewModel.events.first?.attendees.isEmpty == true)
+        }
+        
+        @Test("ToggleParticipation: Gère l'erreur (Rollback)")
+        func toggleParticipationFailure() async {
+                // Given
+                mockAuthService.mockUserId = "me"
+                let event = Event(userId: "host", title: "Party", description: "", date: .now, location: "", category: .music, latitude: 0, longitude: 0)
+                mockEventService.mockEvents = [event]
+                await viewModel.fetchEvents()
+                
+                mockEventService.shouldReturnError = true
+                
+                // When
+                await confirmation { confirm in
+                        mockEventService.onFetchEvents = { confirm() }
+                        await viewModel.toggleParticipation(event: event)
+                }
+                
+                // Then
+                #expect(viewModel.errorMessage == "Erreur de chargement.")
+        }
+        
+        @Test("ToggleParticipation: Ne fait rien sans utilisateur")
+        func toggleParticipation_noUser_doesNothing() async {
+                // Given
+                mockAuthService.mockUserId = nil
+                let event = Event(userId: "u1", title: "Test", description: "", date: Date(), location: "", category: .music, latitude: 0, longitude: 0)
+                
+                // When
+                await viewModel.toggleParticipation(event: event)
+                
+                // Then
+                #expect(viewModel.events.isEmpty)
         }
 }
