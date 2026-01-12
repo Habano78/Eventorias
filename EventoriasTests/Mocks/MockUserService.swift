@@ -15,7 +15,7 @@ final class MockUserService: UserServiceProtocol {
         var mockUser: User?
         var shouldReturnError = false
         
-        // MARK: - Hooks
+        // MARK: Hooks
         var onFetchUser: (() -> Void)?
         var onSaveUser: (() -> Void)?
         var onUploadImage: (() -> Void)?

@@ -13,13 +13,13 @@ import FirebaseCore
 @Observable
 final class DIContainer {
         
-        // Services
+        //MARK: Services
         let authService: any AuthServiceProtocol
         let userService: any UserServiceProtocol
         let eventService: any EventServiceProtocol
         private let imageStorageService: any ImageStorageServiceProtocol
         
-        // ViewModels
+        //MARK: ViewModels
         let authViewModel: AuthViewModel
         let eventListViewModel: EventListViewModel
         

@@ -11,11 +11,11 @@ import Foundation
 @MainActor
 final class MockEventService: EventServiceProtocol {
         
-        // MARK: - State
+        // MARK: State
         var mockEvents: [Event] = []
         var shouldReturnError = false
         
-        // MARK: - Hooks
+        // MARK: Hooks
         var onFetchEvents: (() -> Void)?
         var onAddEvent: (() -> Void)?
         var onDeleteEvent: (() -> Void)?
@@ -23,10 +23,10 @@ final class MockEventService: EventServiceProtocol {
         var onUpdateParticipation: (() -> Void)?
         var onUploadImage: (() -> Void)?
         
-        // MARK: - Implementation
+        // MARK: Implementation
         
         func fetchEvents() async throws -> [Event] {
-                defer { onFetchEvents?() } // 🛡️ Signal de fin
+                defer { onFetchEvents?() }
                 
                 if shouldReturnError {
                         throw NSError(domain: "Mock", code: 500, userInfo: [NSLocalizedDescriptionKey: "Erreur serveur simulée"])
@@ -67,25 +67,25 @@ final class MockEventService: EventServiceProtocol {
                 }
                 
                 guard let index = mockEvents.firstIndex(where: { $0.id == event.id }) else {
-                        return // Ou throw error "Not Found" selon ton besoin
+                        return
                 }
                 
-                // Simulation logique image : Si nouvelle data, nouvelle URL. Sinon, on garde l'ancienne.
+                // Simulation image
                 let finalImageURL = newImageData != nil ? "https://mock.com/updated_image.jpg" : event.imageURL
                 
-                // 🏗️ Création d'une nouvelle instance (Immuabilité / Best Practice)
+                //Création d'une nouvelle instance
                 let updatedEvent = Event(
                         id: event.id,
-                        userId: event.userId,       // Inchangé
-                        title: title,               // Modifié
-                        description: description,   // Modifié
-                        date: date,                 // Modifié
-                        location: location,         // Modifié
-                        category: category,         // Modifié
-                        attendees: event.attendees, // Inchangé
-                        imageURL: finalImageURL,    // Potentiellement modifié
-                        latitude: event.latitude,   // Inchangé (ou devrait être mis à jour via location ?)
-                        longitude: event.longitude  // Inchangé
+                        userId: event.userId,
+                        title: title,
+                        description: description,
+                        date: date,
+                        location: location,
+                        category: category,
+                        attendees: event.attendees,
+                        imageURL: finalImageURL,
+                        latitude: event.latitude,
+                        longitude: event.longitude
                 )
                 
                 mockEvents[index] = updatedEvent

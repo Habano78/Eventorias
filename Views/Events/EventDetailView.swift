@@ -102,7 +102,8 @@ struct EventDetailView: View {
                 .navigationBarTitleDisplayMode(.inline)
         }
         
-        // MARK: - Subviews (Découpées pour être réutilisables dans les 2 layouts)
+        
+        // MARK: Subviews
         
         private var mainImageSection: some View {
                 Group {

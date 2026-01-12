@@ -13,12 +13,12 @@ import FirebaseCore
 @MainActor
 struct EventListViewModelTests {
         
-        // MARK: - Properties
+        // MARK: Properties
         let viewModel: EventListViewModel
         let mockEventService: MockEventService
         let mockAuthService: MockAuthService
         
-        // MARK: - Setup
+        // MARK: Setup
         init() {
                 if FirebaseApp.app() == nil { FirebaseApp.configure() }
                 
@@ -31,7 +31,7 @@ struct EventListViewModelTests {
                 )
         }
         
-        // MARK: - Tests: Chargement (Fetch)
+        // MARK: Fetch
         
         @Test("FetchEvents: Charge les événements avec succès")
         func fetchEventsSuccess() async {
@@ -96,7 +96,7 @@ struct EventListViewModelTests {
                 #expect(fetchCalled == false)
         }
         
-        // MARK: - Tests: Ajout (Add)
+        // MARK: Add
         
         @Test("AddEvent: Ajoute un événement avec image")
         func addEventWithImage() async throws {
@@ -183,7 +183,7 @@ struct EventListViewModelTests {
                 }
         }
         
-        // MARK: - Tests: Suppression
+        // MARK: Delete
         
         @Test("DeleteEvent: Supprime un événement avec succès")
         func deleteEventSuccess() async throws {
@@ -249,7 +249,7 @@ struct EventListViewModelTests {
                 #expect(viewModel.events.first?.id == event2.id)
         }
         
-        // MARK: - Tests: Édition (Edit)
+        // MARK: Edit
         
         @Test("EditEvent: Modifie un événement avec succès")
         func editEventSuccess() async throws {
@@ -328,7 +328,7 @@ struct EventListViewModelTests {
                 }
         }
         
-        // MARK: - Tests: Participation (Toggle)
+        // MARK: Participation (Toggle)
         
         @Test("ToggleParticipation: Rejoint un événement")
         func toggleParticipation_joinEvent() async {

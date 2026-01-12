@@ -16,7 +16,7 @@ protocol AuthServiceProtocol: Sendable {
         func signOut() throws
 }
 
-// MARK: - Implementation
+// MARK: Implementation
 final class AuthService: AuthServiceProtocol {
         
         static let shared = AuthService()

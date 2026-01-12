@@ -19,7 +19,7 @@ struct AuthViewModelTests {
         let mockAuthService: MockAuthService
         let mockUserService: MockUserService
         
-        // MARK: - Setup
+        // MARK: Setup
         init() {
                 if FirebaseApp.app() == nil { FirebaseApp.configure() }
                 
@@ -32,7 +32,7 @@ struct AuthViewModelTests {
                 )
         }
         
-        // MARK: - Tests: Init & Session
+        // MARK: Init + Session
         
         @Test("Init: Charge l'utilisateur s'il est déjà connecté")
         func initLoadsUserIfSignedIn() async {
@@ -51,7 +51,7 @@ struct AuthViewModelTests {
                         
                         try? await Task.sleep(nanoseconds: 100_000_000)
                 }
-        
+                
         }
         
         @Test("isUserSignedIn: Renvoie true si un utilisateur est connecté")
@@ -72,7 +72,7 @@ struct AuthViewModelTests {
                 #expect(viewModel.isUserSignedIn == false)
         }
         
-        // MARK: - Tests: SignIn
+        // MARK: SignIn
         
         @Test("SignIn: Connecte l'utilisateur avec succès")
         func signInSuccess() async {
@@ -105,7 +105,7 @@ struct AuthViewModelTests {
                 #expect(viewModel.errorMessage != nil)
         }
         
-        // MARK: - Tests: Inscription (SignUp)
+        // MARK: SignUp
         
         @Test("SignUp: Inscrit et sauvegarde l'utilisateur")
         func signUpSuccess() async {
@@ -139,7 +139,7 @@ struct AuthViewModelTests {
                 #expect(viewModel.errorMessage != nil)
         }
         
-        // MARK: - Tests: Déconnexion (SignOut)
+        // MARK: SignOut
         
         @Test("SignOut: Déconnecte l'utilisateur")
         func signOutSuccess() {
@@ -165,7 +165,7 @@ struct AuthViewModelTests {
                 #expect(viewModel.errorMessage == "Erreur déconnexion")
         }
         
-        // MARK: - Tests: Profil (Update & Fetch)
+        // MARK: Profil (Update & Fetch)
         
         @Test("FetchUser: Gère l'erreur de chargement")
         func fetchUserFailure() async {

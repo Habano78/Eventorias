@@ -91,7 +91,7 @@ struct ProfileView: View {
                                                 }
                                                 .listRowBackground(Color.clear)
                                                 
-                                                // SECTION 2 : ÉDITION INFO
+                                                // ÉDITION INFO
                                                 Section("Informations Personnelles") {
                                                         TextField("Nom complet", text: $name)
                                                                 .accessibilityLabel("Nom d'utilisateur")
@@ -106,7 +106,7 @@ struct ProfileView: View {
                                                         .accessibilityLabel("Email : \(currentUser?.email ?? "Inconnu")")
                                                 }
                                                 
-                                                // STATISTIQUES
+                                                // STATs
                                                 Section {
                                                         HStack {
                                                                 VStack {
@@ -208,7 +208,7 @@ struct ProfileView: View {
         
         private func deleteEvents(at indexSet: IndexSet) {
                 let eventsToDelete = indexSet.map { myCreatedEvents[$0] }
-        
+                
                 Task {
                         for event in eventsToDelete {
                                 await eventListViewModel.deleteEvent(event)

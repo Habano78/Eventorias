@@ -13,7 +13,7 @@ protocol ImageStorageServiceProtocol: Sendable {
     func uploadImage(data: Data, path: String) async throws -> String
 }
 
-// MARK: - Implementation
+// MARK: Implementation
 final class ImageStorageService: ImageStorageServiceProtocol {
     
     private let storage = Storage.storage()

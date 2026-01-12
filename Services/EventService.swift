@@ -31,6 +31,7 @@ final class EventService: EventServiceProtocol {
                 self.imageStorageService = imageStorageService
         }
         
+        //MARK: Methodes
         func fetchEvents() async throws -> [Event] {
                 let snapshot = try await dataBase.collection("events").order(by: "date").getDocuments()
                 return snapshot.documents.compactMap { doc in

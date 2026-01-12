@@ -18,7 +18,7 @@ struct EventRowView: View {
                 HStack(spacing: 0) {
                         
                         HStack(spacing: 12) {
-                
+                                
                                 Image(systemName: "person.crop.circle.fill")
                                         .resizable()
                                         .aspectRatio(contentMode: .fill)
@@ -26,7 +26,7 @@ struct EventRowView: View {
                                         .foregroundStyle(.gray)
                                         .clipShape(Circle())
                                 
-                                VStack(alignment: .leading, spacing: 4) { 
+                                VStack(alignment: .leading, spacing: 4) {
                                         
                                         Text(event.title)
                                                 .font(.headline)
@@ -50,7 +50,7 @@ struct EventRowView: View {
                                 .clipped()
                                 .background(Color(white: 0.12))
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
-                        // MARK: Accessibilité
+                        //Accessibilité
                                 .accessibilityElement(children: .ignore)
                                 .accessibilityLabel("Événement \(event.title), le \(event.date.formatted(date: .long, time: .omitted)), à \(event.location)")
                                 .accessibilityHint("Double-tapez pour voir les détails")
