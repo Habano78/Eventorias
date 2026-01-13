@@ -20,19 +20,17 @@ struct EventListView: View {
                 GridItem(.adaptive(minimum: 320), spacing: 20)
         ]
         
-        ///Propriété calculée pour filtrer les événements
+        //Logique de filtrage
         var filteredEvents: [Event] {
                 var result = viewModel.events
                 
-                /// Filtre par Recherche
                 if !searchText.isEmpty {
                         result = result.filter { event in
                                 event.title.localizedCaseInsensitiveContains(searchText) ||
                                 event.location.localizedCaseInsensitiveContains(searchText)
                         }
                 }
-                
-                /// Filtre par Catégorie
+            
                 if let category = viewModel.selectedCategory {
                         result = result.filter { $0.category == category }
                 }
@@ -48,7 +46,7 @@ struct EventListView: View {
                                 Color.black.ignoresSafeArea()
                                 VStack(spacing: 0) {
                                         
-                                        //BARRE DE TRI selon Catégories
+                                        // TRI selon Catégories
                                         ScrollView(.horizontal, showsIndicators: false) {
                                                 HStack(spacing: 10) {
                                                         

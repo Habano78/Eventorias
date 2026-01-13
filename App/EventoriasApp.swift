@@ -20,7 +20,8 @@ struct EventoriasApp: App {
         
         @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
         
-       let container: DIContainer
+        //MARK: Dependence
+        let container: DIContainer
         
         // MARK: Init
         init() {
@@ -28,6 +29,7 @@ struct EventoriasApp: App {
                 if FirebaseApp.app() == nil {
                         FirebaseApp.configure()
                 }
+                
                 self.container = DIContainer()
                 
                 requestNotificationPermission()

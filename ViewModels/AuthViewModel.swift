@@ -22,6 +22,7 @@ class AuthViewModel {
         var errorMessage: String?
         var isLoading: Bool = false
         
+        
         // MARK: Computed property
         var isUserSignedIn: Bool {
                 return authService.currentUserId != nil
@@ -44,21 +45,21 @@ class AuthViewModel {
         // MARK: Authentification -Sign In, Sign Up, Sign Out
         
         func signIn(email: String, password: String) async {
-                self.isLoading = true
-                self.errorMessage = nil
+                isLoading = true
+               errorMessage = nil
                 
                 do {
                         let uid = try await authService.signIn(email: email, password: password)
-                        await self.fetchUser(fireBaseUserId: uid)
+                        await fetchUser(fireBaseUserId: uid)
                 } catch {
-                        self.errorMessage = "Erreur connexion : \(error.localizedDescription)"
+                        errorMessage = "Erreur connexion : \(error.localizedDescription)"
                 }
-                self.isLoading = false
+                isLoading = false
         }
         
         func signUp(email: String, password: String) async {
-                self.isLoading = true
-                self.errorMessage = nil
+                isLoading = true
+                errorMessage = nil
                 
                 do {
                         let uid = try await authService.signUp(email: email, password: password)
@@ -72,44 +73,44 @@ class AuthViewModel {
                         )
                         
                         try await userService.saveUser(newUser)
-                        self.currentUser = newUser
+                        currentUser = newUser
                         
                 } catch {
-                        self.errorMessage = "Erreur inscription : \(error.localizedDescription)"
+                        errorMessage = "Erreur inscription : \(error.localizedDescription)"
                 }
-                self.isLoading = false
+                isLoading = false
         }
         
         func signOut() {
                 do {
                         try authService.signOut()
-                        self.currentUser = nil
+                        currentUser = nil
                 } catch {
-                        self.errorMessage = "Erreur déconnexion"
+                        errorMessage = "Erreur déconnexion"
                 }
         }
         
         // MARK: Profil -Fetch & Update
         
         func fetchUser(fireBaseUserId: String) async {
-                self.isLoading = true
+                isLoading = true
                 do {
-                        self.currentUser = try await userService.fetchUser(userId: fireBaseUserId)
+                        currentUser = try await userService.fetchUser(userId: fireBaseUserId)
                 } catch {
                         print("Erreur chargement user: \(error.localizedDescription)")
                         errorMessage = "Impossible de charger le profil."
                 }
-                self.isLoading = false
+                isLoading = false
         }
         
         func updateProfile(name: String, isNotifEnabled: Bool, image: UIImage?) async {
                 guard let currentUid = currentUser?.fireBaseUserId, let email = currentUser?.email else { return }
                 
-                self.isLoading = true
-                self.errorMessage = nil
+                isLoading = true
+                errorMessage = nil
                 
                 do {
-                        var imageURL: String? = self.currentUser?.profileImageURL
+                        var imageURL: String? = currentUser?.profileImageURL
                         
                         if let image = image, let imageData = image.jpegData(compressionQuality: 0.5) {
                                 imageURL = try await userService.uploadProfileImage(data: imageData)
@@ -124,11 +125,11 @@ class AuthViewModel {
                         )
                         
                         try await userService.saveUser(updatedUser)
-                        self.currentUser = updatedUser
+                        currentUser = updatedUser
                         
                 } catch {
-                        self.errorMessage = "Erreur de sauvegarde : \(error.localizedDescription)"
+                       errorMessage = "Erreur de sauvegarde : \(error.localizedDescription)"
                 }
-                self.isLoading = false
+                isLoading = false
         }
 }

@@ -13,8 +13,8 @@ struct RootView: View {
         
         var body: some View {
                 Group {
-                        if authViewModel.currentUser != nil {
-                                EventListView()
+                        if authViewModel.isUserSignedIn {
+                                AppTabView()
                         }
                         else {
                                 LoginView()

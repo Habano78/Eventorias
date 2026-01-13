@@ -23,6 +23,8 @@ final class DIContainer {
         let authViewModel: AuthViewModel
         let eventListViewModel: EventListViewModel
         
+        
+        //MARK: Init
         init() {
                 
                 self.imageStorageService = ImageStorageService()
