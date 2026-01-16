@@ -39,3 +39,6 @@ final class AuthService: AuthServiceProtocol {
                 try Auth.auth().signOut()
         }
 }
+
+
+// Auht gère uniquement émail, mot de passe, jetons de session (tokens) et l'UID unique.

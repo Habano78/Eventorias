@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct User: Identifiable, Codable, Sendable {
+struct User: Identifiable, Codable, Sendable, Equatable {
         
         let fireBaseUserId: String
         let email: String

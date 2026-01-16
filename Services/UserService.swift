@@ -52,3 +52,6 @@ final class UserService: UserServiceProtocol {
                 return try await imageStorageService.uploadImage(data: data, path: path)
         }
 }
+
+
+// UserService gère nom, prénom, URL de la photo de profil, préférences (notifications), liste d'amis. 

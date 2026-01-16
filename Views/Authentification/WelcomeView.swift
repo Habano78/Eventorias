@@ -56,6 +56,7 @@ struct WelcomeView: View {
                                                 .background(Color.red)
                                                 .cornerRadius(10)
                                         }
+                                        .disabled(authViewModel.isLoading)
                                         .padding(.horizontal, 30)
                                         .padding(.bottom, 200)
                                         .accessibilityLabel("Se connecter avec un email")

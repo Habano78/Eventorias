@@ -164,9 +164,19 @@ class EventListViewModel {
                 } catch {
                         await fetchEvents()
                 }
+                
         }
         
-        // MARK: - Helpers Privés (Notifications)
+        // MARK: - Nettoyage Logout
+        func clearData() {
+                self.events = []
+                self.selectedCategory = nil
+                self.errorMessage = nil
+                self.isLoading = false
+                print("🧹 Données du EventListViewModel effacées.")
+        }
+        
+        // MARK: Notifications
         private func scheduleNotification(for event: Event) {
                 let content = UNMutableNotificationContent()
                 content.title = "Rappel : \(event.title)"

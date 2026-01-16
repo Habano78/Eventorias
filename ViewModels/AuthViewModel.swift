@@ -21,12 +21,8 @@ class AuthViewModel {
         var currentUser: User?
         var errorMessage: String?
         var isLoading: Bool = false
+        var isUserSignedIn: Bool = false
         
-        
-        // MARK: Computed property
-        var isUserSignedIn: Bool {
-                return authService.currentUserId != nil
-        }
         
         // MARK: - Init
         init(
@@ -36,9 +32,11 @@ class AuthViewModel {
                 self.authService = authService
                 self.userService = userService
                 
+                self.isUserSignedIn = authService.currentUserId != nil
+                
                 /// Vérification session au démarrage
-                if let uid = authService.currentUserId {
-                        Task { await fetchUser(fireBaseUserId: uid) }
+                if let userID = authService.currentUserId {
+                        Task { await fetchUser(fireBaseUserId: userID) }
                 }
         }
         
@@ -46,11 +44,12 @@ class AuthViewModel {
         
         func signIn(email: String, password: String) async {
                 isLoading = true
-               errorMessage = nil
+                errorMessage = nil
                 
                 do {
-                        let uid = try await authService.signIn(email: email, password: password)
-                        await fetchUser(fireBaseUserId: uid)
+                        let userID = try await authService.signIn(email: email, password: password)
+                        isUserSignedIn = true
+                        await fetchUser(fireBaseUserId: userID)
                 } catch {
                         errorMessage = "Erreur connexion : \(error.localizedDescription)"
                 }
@@ -62,10 +61,11 @@ class AuthViewModel {
                 errorMessage = nil
                 
                 do {
-                        let uid = try await authService.signUp(email: email, password: password)
+                        let userID = try await authService.signUp(email: email, password: password)
+                        isUserSignedIn = true
                         
                         let newUser = User(
-                                fireBaseUserId: uid,
+                                fireBaseUserId: userID,
                                 email: email,
                                 name: "Nouvel Utilisateur",
                                 profileImageURL: nil,
@@ -85,8 +85,10 @@ class AuthViewModel {
                 do {
                         try authService.signOut()
                         currentUser = nil
+                        isUserSignedIn = false
+                        
                 } catch {
-                        errorMessage = "Erreur déconnexion"
+                        print("Erreur lors de la déconnexion : \(error.localizedDescription)")
                 }
         }
         
@@ -128,7 +130,7 @@ class AuthViewModel {
                         currentUser = updatedUser
                         
                 } catch {
-                       errorMessage = "Erreur de sauvegarde : \(error.localizedDescription)"
+                        errorMessage = "Erreur de sauvegarde : \(error.localizedDescription)"
                 }
                 isLoading = false
         }

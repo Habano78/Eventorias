@@ -19,6 +19,7 @@ final class DIContainer {
         let eventService: any EventServiceProtocol
         private let imageStorageService: any ImageStorageServiceProtocol
         
+        
         //MARK: ViewModels
         let authViewModel: AuthViewModel
         let eventListViewModel: EventListViewModel

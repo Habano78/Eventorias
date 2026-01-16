@@ -32,6 +32,7 @@ struct LoginView: View {
                                 
                                 /// Email
                                 TextField("Email", text: $email)
+                                        .disabled(authViewModel.isLoading)
                                         .keyboardType(.emailAddress)
                                         .autocapitalization(.none)
                                         .padding()
@@ -43,6 +44,7 @@ struct LoginView: View {
                                 
                                 /// Mot de passe
                                 SecureField("Mot de passe", text: $password)
+                                        .disabled(authViewModel.isLoading)
                                         .padding()
                                         .background(Color(white: 0.15))
                                         .foregroundStyle(.white)
@@ -73,7 +75,9 @@ struct LoginView: View {
                                                 .cornerRadius(10)
                                 }
                                 .accessibilityLabel(isLoginMode ? "Se connecter" : "S'inscrire")
+                                .disabled(authViewModel.isLoading)
                                 .accessibilityHint("Valide le formulaire")
+                                
                                 
                                 Button {
                                         withAnimation {
