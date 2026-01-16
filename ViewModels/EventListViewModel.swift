@@ -50,11 +50,21 @@ class EventListViewModel {
                 isLoading = false
         }
         
+        
+        //MARK: Methods
+        
         func loadEventsIfNeeded() async {
                 if events.isEmpty {
                         await fetchEvents()
                 }
         }
+        
+        //MARK: isOwner 
+        func isOwner(of event: Event) -> Bool {
+            guard let currentUid = currentUserId else { return false }
+            return event.userId == currentUid
+        }
+        
         
         // MARK: Écriture -Add, Edit, Delete
         
@@ -143,28 +153,25 @@ class EventListViewModel {
         // MARK: Actions Utilisateur -Participation
         
         func toggleParticipation(event: Event) async {
+                
                 guard let currentUserId = currentUserId else { return }
                 guard let index = events.firstIndex(where: { $0.id == event.id }) else { return }
                 
-                let liveEvent = events[index]
-                let isJoining = !liveEvent.attendees.contains(currentUserId)
-                
-                var updatedAttendees = liveEvent.attendees
-                if isJoining {
-                        updatedAttendees.append(currentUserId)
-                        scheduleNotification(for: liveEvent)
+                let updatedEvent = events[index]
+                if updatedEvent.attendees.contains(currentUserId) {
+                        updatedEvent.attendees.removeAll { $0 == currentUserId }
                 } else {
-                        updatedAttendees.removeAll { $0 == currentUserId }
-                        cancelNotification(for: liveEvent)
+                        updatedEvent.attendees.append(currentUserId)
                 }
-                events[index].attendees = updatedAttendees
+                events[index] = updatedEvent
                 
                 do {
-                        try await eventService.updateParticipation(eventId: liveEvent.id, userId: currentUserId, isJoining: isJoining)
+                        let isJoining = updatedEvent.attendees.contains(currentUserId)
+                        try await eventService.updateParticipation(eventId: event.id, userId: currentUserId, isJoining: isJoining)
                 } catch {
-                        await fetchEvents()
+                        events[index] = event
+                        self.errorMessage = "Erreur de connexion"
                 }
-                
         }
         
         // MARK: - Nettoyage Logout
@@ -173,7 +180,6 @@ class EventListViewModel {
                 self.selectedCategory = nil
                 self.errorMessage = nil
                 self.isLoading = false
-                print("🧹 Données du EventListViewModel effacées.")
         }
         
         // MARK: Notifications

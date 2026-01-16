@@ -50,7 +50,6 @@ struct EventRowView: View {
                                 .clipped()
                                 .background(Color(white: 0.12))
                                 .clipShape(RoundedRectangle(cornerRadius: 16))
-                        //Accessibilité
                                 .accessibilityElement(children: .ignore)
                                 .accessibilityLabel("Événement \(event.title), le \(event.date.formatted(date: .long, time: .omitted)), à \(event.location)")
                                 .accessibilityHint("Double-tapez pour voir les détails")

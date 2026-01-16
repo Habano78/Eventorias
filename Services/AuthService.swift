@@ -19,8 +19,6 @@ protocol AuthServiceProtocol: Sendable {
 // MARK: Implementation
 final class AuthService: AuthServiceProtocol {
         
-        static let shared = AuthService()
-        
         var currentUserId: String? {
                 return Auth.auth().currentUser?.uid
         }

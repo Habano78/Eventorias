@@ -49,12 +49,28 @@ struct CalendarView: View {
                                                 )
                                                 Spacer()
                                         } else {
-                                                List(eventsOfDay) { event in
-                                                        NavigationLink(destination: EventDetailView(event: event)) {
-                                                                EventRowView(event: event)
+                                                List {
+                                                        ForEach(eventsOfDay) { event in
+                                                                NavigationLink(destination: EventDetailView(event: event)) {
+                                                                        EventRowView(event: event)
+                                                                }
+                                                                .listRowBackground(Color.clear)
+                                                                .listRowSeparator(.hidden)
+                                                                
+                                                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                                                        if viewModel.isOwner(of: event) {
+                                                                                Button(role: .destructive) {
+                                                                                        
+                                                                                        Task {
+                                                                                                await viewModel.deleteEvent(event)
+                                                                                        }
+                                                                                } label: {
+                                                                                        Label("Supprimer", systemImage: "trash")
+                                                                                }
+                                                                                .tint(.red)
+                                                                        }
+                                                                }
                                                         }
-                                                        .listRowBackground(Color.clear)
-                                                        .listRowSeparator(.hidden)
                                                 }
                                                 .listStyle(.plain)
                                         }

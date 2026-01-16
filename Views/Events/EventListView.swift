@@ -16,9 +16,6 @@ struct EventListView: View {
         @State private var showAddSheet = false
         @State private var searchText = ""
         
-        let columns = [
-                GridItem(.adaptive(minimum: 320), spacing: 20)
-        ]
         
         //Logique de filtrage
         var filteredEvents: [Event] {
@@ -88,7 +85,7 @@ struct EventListView: View {
                                                 // Adaptation Ipad/Iphone
                                                 if sizeClass == .regular {
                                                         ScrollView {
-                                                                LazyVGrid(columns: columns, spacing: 20) {
+                                                                LazyVGrid(columns: UIConfig.Layout.gridColumns, spacing: 20) {
                                                                         ForEach(filteredEvents) { event in
                                                                                 NavigationLink(destination: EventDetailView(event: event)) {
                                                                                         EventRowView(event: event)

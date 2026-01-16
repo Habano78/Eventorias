@@ -50,7 +50,7 @@ struct AddEventView: View {
                                 
                                 /// Date et Lieu
                                 Section(header: Text("Quand et Où ?")) {
-                                        DatePicker("Date", selection: $date, displayedComponents: [.date, .hourAndMinute])
+                                        DatePicker("Date", selection: $date, in: Date()..., displayedComponents: [.date, .hourAndMinute])
                                                 .accessibilityLabel("Date et heure de début")
                                         
                                         TextField("Lieu (Ville, Adresse)", text: $location)
@@ -109,12 +109,22 @@ struct AddEventView: View {
                         
                         /// Gestion de la sélection d'image
                         .onChange(of: selectedItem) { oldValue, newItem in
+                                
+                                guard let item = newItem else { return }
+                                
                                 Task {
-                                        if let data = try? await newItem?.loadTransferable(type: Data.self),
-                                           let uiImage = UIImage(data: data) {
-                                                
-                                                self.selectedImage = uiImage
-                                                self.selectedImageData = uiImage.jpegData(compressionQuality: 0.5)
+                                        
+                                        do {
+                                                if let data = try await item.loadTransferable(type: Data.self),
+                                                   let uiImage = UIImage(data: data) {
+                                                        
+                                                        selectedImage = uiImage
+                                                        
+                                                } else {
+                                                        print("Aucune donnée trouvée dans l'image sélectionnée.")
+                                                }
+                                        } catch {
+                                                print("Erreur chargement image : \(error.localizedDescription)")
                                         }
                                 }
                         }

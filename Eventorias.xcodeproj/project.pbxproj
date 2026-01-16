@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		226BAECA2F1A9F050086846D /* Constants_Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 226BAEC92F1A9F050086846D /* Constants_Configuration.swift */; };
 		2285A2072EF00B45000D512A /* EventoriasApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A2062EF00B45000D512A /* EventoriasApp.swift */; };
 		2285A20B2EF00B47000D512A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2285A20A2EF00B47000D512A /* Assets.xcassets */; };
 		2285A2362EF01C20000D512A /* Event.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2285A2352EF01C20000D512A /* Event.swift */; };
@@ -38,6 +39,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		226BAEC92F1A9F050086846D /* Constants_Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants_Configuration.swift; sourceTree = "<group>"; };
 		2285A2032EF00B45000D512A /* Eventorias.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Eventorias.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2285A2062EF00B45000D512A /* EventoriasApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventoriasApp.swift; sourceTree = "<group>"; };
 		2285A20A2EF00B47000D512A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -197,6 +199,7 @@
 			isa = PBXGroup;
 			children = (
 				2285A2CE2F0D792F000D512A /* LocationHelper.swift */,
+				226BAEC92F1A9F050086846D /* Constants_Configuration.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -339,6 +342,7 @@
 				2285A23E2EF0249E000D512A /* EventListViewModel.swift in Sources */,
 				2285A2382EF01CB4000D512A /* User.swift in Sources */,
 				2285A2E02F0FD5EB000D512A /* ImageStorageService.swift in Sources */,
+				226BAECA2F1A9F050086846D /* Constants_Configuration.swift in Sources */,
 				2285A2CF2F0D792F000D512A /* LocationHelper.swift in Sources */,
 				2285A27D2EF1D943000D512A /* EventService.swift in Sources */,
 				2285A2622EF16DAD000D512A /* DIContainer.swift in Sources */,

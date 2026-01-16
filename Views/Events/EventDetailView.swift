@@ -7,7 +7,6 @@
 
 import SwiftUI
 import MapKit
-import FirebaseAuth
 
 struct EventDetailView: View {
         
@@ -17,11 +16,13 @@ struct EventDetailView: View {
         @Environment(\.dismiss) var dismiss
         @Environment(EventListViewModel.self) var eventListViewModel
         @Environment(\.horizontalSizeClass) var sizeClass
+        
         @State private var showEditSheet = false
+        @State private var showDeleteAlert = false
         
         //MARK: Computed Properties
         var isParticipating: Bool {
-                guard let currentUserId = Auth.auth().currentUser?.uid else { return false }
+                guard let currentUserId = eventListViewModel.currentUserId else { return false }
                 if let liveEvent = eventListViewModel.events.first(where: { $0.id == event.id }) {
                         return liveEvent.attendees.contains(currentUserId)
                 }
@@ -85,11 +86,29 @@ struct EventDetailView: View {
                                 }
                                 .accessibilityLabel("Partager l'événement")
                         }
-                        if let currentUserId = eventListViewModel.currentUserId, event.userId == currentUserId {
+                        
+                        if eventListViewModel.isOwner(of: event) {
+                                
                                 ToolbarItem(placement: .topBarTrailing) {
-                                        Button("Modifier") { showEditSheet.toggle() }
-                                                .tint(.white)
-                                                .accessibilityHint("Ouvre le formulaire de modification")
+                                        Menu {
+                                                /// Modifier
+                                                Button {
+                                                        showEditSheet.toggle()
+                                                } label: {
+                                                        Label("Modifier", systemImage: "pencil")
+                                                }
+                                                
+                                                Text("aqui no va nada")
+                                                /// Supprimer
+                                                Button(role: .destructive) {
+                                                        showDeleteAlert = true
+                                                } label: {
+                                                        Label("Supprimer", systemImage: "trash")
+                                                }
+                                                
+                                        } label: {
+                                                Image(systemName: "ellipsis.circle")
+                                        }
                                 }
                         }
                 }

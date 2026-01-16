@@ -100,11 +100,23 @@ struct EditEventView: View {
                                 self.date = event.date
                                 self.selectedCategory = event.category
                         }
-                        .onChange(of: selectedItem) { _, newItem in
+                        .onChange(of: selectedItem) { oldValue, newItem in
+                                
+                                guard let item = newItem else { return }
+                                
                                 Task {
-                                        if let data = try? await newItem?.loadTransferable(type: Data.self),
-                                           let uiImage = UIImage(data: data) {
-                                                self.selectedImage = uiImage
+                                        do {
+                                                if let data = try await item.loadTransferable(type: Data.self),
+                                                   let uiImage = UIImage(data: data) {
+                                                        
+                                                        self.selectedImage = uiImage
+                                                        
+                                                } else {
+                                                        print("Aucune donnée trouvée dans l'image sélectionnée.")
+                                                }
+                                        } catch {
+                                                print("Erreur chargement image : \(error.localizedDescription)")
+                                                // une variable 'errorMessage': "Impossible de télécharger l'image depuis iCloud"
                                         }
                                 }
                         }

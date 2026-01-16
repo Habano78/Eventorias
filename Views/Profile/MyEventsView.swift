@@ -6,27 +6,23 @@
 //
 
 import SwiftUI
-import FirebaseAuth
 
 struct MyEventsView: View {
         
         //MARK: Properties
-        @Environment(EventListViewModel.self) var viewModel
+        @Environment(EventListViewModel.self) var eventListViewModel
         @Environment(\.horizontalSizeClass) var sizeClass
         
         //MARK: Computed properties
         var myTickets: [Event] {
-                guard let currentUserId = Auth.auth().currentUser?.uid else { return [] }
+                guard let currentUserId = eventListViewModel.currentUserId else { return [] }
                 
-                return viewModel.events.filter { event in
+                return eventListViewModel.events.filter { event in
                         event.attendees.contains(currentUserId)
                 }
         }
         
-        /// Configuration grille iPad
-        let columns = [
-                GridItem(.adaptive(minimum: 320), spacing: 20)
-        ]
+        
         
         //MARK: body
         var body: some View {
@@ -60,7 +56,7 @@ struct MyEventsView: View {
                                         if sizeClass == .regular {
                                                 /// IPad
                                                 ScrollView {
-                                                        LazyVGrid(columns: columns, spacing: 20) {
+                                                        LazyVGrid(columns: UIConfig.Layout.gridColumns, spacing: 20) {
                                                                 ForEach(myTickets) { event in
                                                                         NavigationLink(destination: EventDetailView(event: event)) {
                                                                                 EventRowView(event: event)

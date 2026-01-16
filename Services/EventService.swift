@@ -26,17 +26,34 @@ final class EventService: EventServiceProtocol {
         private let dataBase = Firestore.firestore()
         private let imageStorageService: ImageStorageServiceProtocol
         
+        
         //MARK: Init
         init(imageStorageService: ImageStorageServiceProtocol) {
                 self.imageStorageService = imageStorageService
         }
         
+        
         //MARK: Methodes
         func fetchEvents() async throws -> [Event] {
-                let snapshot = try await dataBase.collection("events").order(by: "date").getDocuments()
+                let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date()) ?? Date()
+                let snapshot = try await dataBase.collection("events")
+                        .whereField("date", isGreaterThan: sevenDaysAgo)
+                        .order(by: "date", descending: false)
+                        .limit(to: 50)
+                        .getDocuments()
+                /// Mapping des données
                 return snapshot.documents.compactMap { doc in
-                        guard let dto = try? doc.data(as: EventDTO.self) else { return nil }
-                        return Event(dto: dto)
+                        
+                        do {
+                                let dto = try doc.data(as: EventDTO.self)
+                                return Event(dto: dto)
+                                
+                        } catch {
+                                print("ERREUR CRITIQUE sur l'event ID : \(doc.documentID)")
+                                print("Détail de l'erreur : \(error)")
+                                
+                                return nil
+                        }
                 }
         }
         
