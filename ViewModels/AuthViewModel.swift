@@ -89,6 +89,7 @@ class AuthViewModel {
                         
                 } catch {
                         print("Erreur lors de la déconnexion : \(error.localizedDescription)")
+                        errorMessage = "Erreur déconnexion"
                 }
         }
         

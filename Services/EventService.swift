@@ -114,7 +114,7 @@ private struct EventDTO: Codable, Identifiable {
 }
 
 private extension Event {
-        convenience init(dto: EventDTO) {
+        init(dto: EventDTO) {
                 self.init(
                         id: dto.id ?? UUID().uuidString,
                         userId: dto.userId,

@@ -11,6 +11,7 @@ import PhotosUI
 struct EditEventView: View {
         
         let event: Event
+        
         @Environment(EventListViewModel.self) var eventListViewModel
         @Environment(\.dismiss) var dismiss
         

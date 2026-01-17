@@ -102,7 +102,7 @@ final class MockEventService: EventServiceProtocol {
                         return
                 }
                 
-                let eventToUpdate = mockEvents[index]
+                var eventToUpdate = mockEvents[index]
                 
                 if isJoining {
                         if !eventToUpdate.attendees.contains(userId) {

@@ -370,6 +370,7 @@ struct EventListViewModelTests {
         func toggleParticipationFailure() async {
                 // Given
                 mockAuthService.mockUserId = "me"
+                
                 let event = Event(userId: "host", title: "Party", description: "", date: .now, location: "", category: .music, latitude: 0, longitude: 0)
                 mockEventService.mockEvents = [event]
                 await viewModel.fetchEvents()
@@ -377,13 +378,12 @@ struct EventListViewModelTests {
                 mockEventService.shouldReturnError = true
                 
                 // When
-                await confirmation { confirm in
-                        mockEventService.onFetchEvents = { confirm() }
-                        await viewModel.toggleParticipation(event: event)
-                }
+                await viewModel.toggleParticipation(event: event)
                 
                 // Then
-                #expect(viewModel.errorMessage == "Erreur de chargement.")
+                #expect(viewModel.errorMessage == "Impossible de modifier la participation.")
+                let eventInList = viewModel.events.first
+                #expect(eventInList?.attendees.contains("me") == false)
         }
         
         @Test("ToggleParticipation: Ne fait rien sans utilisateur")
@@ -397,5 +397,63 @@ struct EventListViewModelTests {
                 
                 // Then
                 #expect(viewModel.events.isEmpty)
+        }
+        
+        // MARK: Clear Data
+        
+        @Test("ClearData: Réinitialise toutes les propriétés du ViewModel")
+        func clearData_resetsEverything() async {
+                // Given
+                // On "salit" le ViewModel avec des données
+                let event = Event(userId: "u1", title: "Test", description: "", date: Date(), location: "", category: .music, latitude: 0, longitude: 0)
+                viewModel.events = [event]
+                viewModel.selectedCategory = .music
+                viewModel.errorMessage = "Une erreur persistante"
+                viewModel.isLoading = true
+                
+                // When
+                viewModel.clearData()
+                
+                // Then
+                #expect(viewModel.events.isEmpty)
+                #expect(viewModel.selectedCategory == nil)
+                #expect(viewModel.errorMessage == nil)
+                #expect(viewModel.isLoading == false)
+        }
+        
+        // MARK: isOwner
+        
+        @Test("IsOwner: Renvoie VRAI si l'utilisateur est le créateur")
+        func isOwner_returnsTrue_whenMatching() {
+                // Given
+                let myId = "my_user_id"
+                mockAuthService.mockUserId = myId
+                
+                let myEvent = Event(userId: myId, title: "Mon Event", description: "", date: .now, location: "", category: .other, latitude: 0, longitude: 0)
+                
+                // When & Then
+                #expect(viewModel.isOwner(of: myEvent) == true)
+        }
+        
+        @Test("IsOwner: Renvoie FAUX si l'utilisateur n'est pas le créateur")
+        func isOwner_returnsFalse_whenNotMatching() {
+                // Given
+                mockAuthService.mockUserId = "my_user_id"
+                
+                let otherEvent = Event(userId: "other_user_id", title: "Pas mon Event", description: "", date: .now, location: "", category: .other, latitude: 0, longitude: 0)
+                
+                // When & Then
+                #expect(viewModel.isOwner(of: otherEvent) == false)
+        }
+        
+        @Test("IsOwner: Renvoie FAUX si aucun utilisateur n'est connecté")
+        func isOwner_returnsFalse_whenLoggedOut() {
+                // Given
+                mockAuthService.mockUserId = nil // Pas de session
+                
+                let someEvent = Event(userId: "any_id", title: "Event", description: "", date: .now, location: "", category: .other, latitude: 0, longitude: 0)
+                
+                // When & Then
+                #expect(viewModel.isOwner(of: someEvent) == false)
         }
 }

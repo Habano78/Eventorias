@@ -1,8 +1,6 @@
 import Foundation
-import Observation
 
-@Observable
-final class Event: Identifiable, Equatable, Hashable {
+struct Event: Identifiable, Equatable, Hashable, Codable, Sendable {
         
         let id: String
         let userId: String
@@ -17,6 +15,7 @@ final class Event: Identifiable, Equatable, Hashable {
         var latitude: Double
         var longitude: Double
         
+        // Init
         init(
                 id: String = UUID().uuidString,
                 userId: String,
@@ -41,15 +40,5 @@ final class Event: Identifiable, Equatable, Hashable {
                 self.imageURL = imageURL
                 self.latitude = latitude
                 self.longitude = longitude
-        }
-        
-        // MARK: Equatable & Hashable
-        
-        static func == (lhs: Event, rhs: Event) -> Bool {
-                lhs.id == rhs.id
-        }
-        
-        func hash(into hasher: inout Hasher) {
-                hasher.combine(id)
         }
 }

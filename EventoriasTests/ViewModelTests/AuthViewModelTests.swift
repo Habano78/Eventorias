@@ -65,11 +65,16 @@ struct AuthViewModelTests {
         
         @Test("isUserSignedIn: Renvoie false si aucun utilisateur n'est connecté")
         func isUserSignedIn_false() async {
+                
                 // Given
                 mockAuthService.mockUserId = nil
+                let localViewModel = AuthViewModel(
+                        authService: mockAuthService,
+                        userService: mockUserService
+                    )
                 
                 // When & Then
-                #expect(viewModel.isUserSignedIn == false)
+                #expect(localViewModel.isUserSignedIn == false)
         }
         
         // MARK: SignIn

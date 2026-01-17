@@ -59,10 +59,10 @@ class EventListViewModel {
                 }
         }
         
-        //MARK: isOwner 
+        //MARK: isOwner
         func isOwner(of event: Event) -> Bool {
-            guard let currentUid = currentUserId else { return false }
-            return event.userId == currentUid
+                guard let currentUid = currentUserId else { return false }
+                return event.userId == currentUid
         }
         
         
@@ -102,7 +102,7 @@ class EventListViewModel {
         }
         
         func editEvent(event: Event, title: String, description: String, date: Date, location: String, category: EventCategory, newImageData: Data?) async {
-                self.isLoading = true
+                isLoading = true
                 
                 do {
                         try await eventService.editEvent(
@@ -117,16 +117,42 @@ class EventListViewModel {
                         
                         if let currentUid = currentUserId, event.attendees.contains(currentUid) {
                                 cancelNotification(for: event)
-                                let updatedEvent = Event(id: event.id, userId: event.userId, title: title, description: description, date: date, location: location, category: category, attendees: event.attendees, imageURL: event.imageURL, latitude: event.latitude, longitude: event.longitude)
-                                scheduleNotification(for: updatedEvent)
+                                
+                                let updatedEventForNotif = Event(
+                                        id: event.id,
+                                        userId: event.userId,
+                                        title: title,
+                                        description: description,
+                                        date: date,
+                                        location: location,
+                                        category: category,
+                                        attendees: event.attendees,
+                                        imageURL: event.imageURL,
+                                        latitude: event.latitude, longitude: event.longitude)
+                                
+                                scheduleNotification(for: updatedEventForNotif)
+                        }
+                        
+                        if let index = events.firstIndex(where: { $0.id == event.id }) {
+                                
+                                var eventToUpdate = events[index]
+                                
+                                eventToUpdate.title = title
+                                eventToUpdate.description = description
+                                eventToUpdate.date = date
+                                eventToUpdate.location = location
+                                eventToUpdate.category = category
+                                
+                                events[index] = eventToUpdate
                         }
                         
                         await fetchEvents()
+                        
                 } catch {
                         print("Erreur édition : \(error)")
                         errorMessage = "Impossible de modifier l'événement."
                 }
-                self.isLoading = false
+                isLoading = false
         }
         
         func deleteEvent(_ event: Event) async {
@@ -153,16 +179,17 @@ class EventListViewModel {
         // MARK: Actions Utilisateur -Participation
         
         func toggleParticipation(event: Event) async {
-                
                 guard let currentUserId = currentUserId else { return }
                 guard let index = events.firstIndex(where: { $0.id == event.id }) else { return }
                 
-                let updatedEvent = events[index]
+                var updatedEvent = events[index]
+                
                 if updatedEvent.attendees.contains(currentUserId) {
                         updatedEvent.attendees.removeAll { $0 == currentUserId }
                 } else {
                         updatedEvent.attendees.append(currentUserId)
                 }
+                
                 events[index] = updatedEvent
                 
                 do {
@@ -170,9 +197,10 @@ class EventListViewModel {
                         try await eventService.updateParticipation(eventId: event.id, userId: currentUserId, isJoining: isJoining)
                 } catch {
                         events[index] = event
-                        self.errorMessage = "Erreur de connexion"
+                        errorMessage = "Impossible de modifier la participation."
                 }
         }
+        
         
         // MARK: - Nettoyage Logout
         func clearData() {
