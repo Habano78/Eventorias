@@ -23,7 +23,12 @@ class AuthViewModel {
         var isLoading: Bool = false
         var isUserSignedIn: Bool = false
         
-        
+        var activeSessionId: String? {
+                if let id = currentUser?.fireBaseUserId {
+                    return id
+                }
+                return authService.currentUserId
+            }
         // MARK: - Init
         init(
                 authService: any AuthServiceProtocol,
@@ -117,9 +122,6 @@ class AuthViewModel {
                         var imagePath: String? = currentUser?.profileImagePath
                         
                         if let image = image, let imageData = image.jpegData(compressionQuality: 0.5) {
-                                if imagePath != nil {
-                                }
-                                
                                 let result = try await userService.uploadProfileImage(data: imageData)
                                 imageURL = result.url
                                 imagePath = result.path

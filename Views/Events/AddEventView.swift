@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import FirebaseAuth
 import PhotosUI
 
 struct AddEventView: View {
