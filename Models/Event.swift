@@ -12,6 +12,7 @@ struct Event: Identifiable, Equatable, Hashable, Codable, Sendable {
         var category: EventCategory
         var attendees: [String]
         var imageURL: String?
+        var imagePath: String?
         var latitude: Double
         var longitude: Double
         
@@ -26,6 +27,7 @@ struct Event: Identifiable, Equatable, Hashable, Codable, Sendable {
                 category: EventCategory,
                 attendees: [String] = [],
                 imageURL: String? = nil,
+                imagePath: String? = nil,
                 latitude: Double,
                 longitude: Double
         ) {
@@ -38,6 +40,7 @@ struct Event: Identifiable, Equatable, Hashable, Codable, Sendable {
                 self.category = category
                 self.attendees = attendees
                 self.imageURL = imageURL
+                self.imagePath = imagePath
                 self.latitude = latitude
                 self.longitude = longitude
         }

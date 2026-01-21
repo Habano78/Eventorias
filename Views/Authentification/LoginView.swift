@@ -17,11 +17,12 @@ struct LoginView: View {
         @State private var password = ""
         @State private var isLoginMode = true
         
+        
         //MARK: body
         var body: some View {
                 ZStack {
-                        
                         Color.black.ignoresSafeArea()
+                        
                         VStack(spacing: 20) {
                                 /// Titre
                                 Text(isLoginMode ? "Connexion" : "Inscription")

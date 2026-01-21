@@ -17,7 +17,7 @@ final class DIContainer {
         let authService: any AuthServiceProtocol
         let userService: any UserServiceProtocol
         let eventService: any EventServiceProtocol
-        private let imageStorageService: any ImageStorageServiceProtocol
+        private let imageService: any ImageStorageServiceProtocol
         
         
         //MARK: ViewModels
@@ -27,12 +27,12 @@ final class DIContainer {
         
         //MARK: Init
         init() {
-                
-                self.imageStorageService = ImageStorageService()
                 self.authService = AuthService()
-                self.userService = UserService(imageStorageService: imageStorageService)
-                self.eventService = EventService(imageStorageService: imageStorageService)
-           
+                self.imageService = ImageStorageService()
+                self.userService = UserService(imageStorageService: imageService)
+                self.eventService = EventService(imageStorageService: imageService)
+                
+                
                 self.authViewModel = AuthViewModel(
                         authService: authService,
                         userService: userService

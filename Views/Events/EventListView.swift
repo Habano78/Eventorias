@@ -17,8 +17,9 @@ struct EventListView: View {
         @State private var searchText = ""
         
         
-        //Logique de filtrage
+        // MARK: - Filtrage
         var filteredEvents: [Event] {
+                
                 var result = viewModel.events
                 
                 if !searchText.isEmpty {
@@ -27,108 +28,55 @@ struct EventListView: View {
                                 event.location.localizedCaseInsensitiveContains(searchText)
                         }
                 }
-            
                 if let category = viewModel.selectedCategory {
                         result = result.filter { $0.category == category }
                 }
-                
-                /// Tri par date
                 return result.sorted { $0.date < $1.date }
         }
         
         // MARK: - Body
         var body: some View {
                 NavigationStack {
-                        ZStack {
-                                Color.black.ignoresSafeArea()
-                                VStack(spacing: 0) {
-                                        
-                                        // TRI selon Catégories
-                                        ScrollView(.horizontal, showsIndicators: false) {
-                                                HStack(spacing: 10) {
-                                                        
-                                                        FilterButton(title: "Tout", isSelected: viewModel.selectedCategory == nil) {
-                                                                withAnimation {
-                                                                        viewModel.selectedCategory = nil
-                                                                }
-                                                        }
-                                                        
-                                                        ForEach(EventCategory.allCases) { category in
-                                                                FilterButton(title: category.rawValue, isSelected: viewModel.selectedCategory == category) {
-                                                                        withAnimation {
-                                                                                viewModel.selectedCategory = category
-                                                                        }
-                                                                }
-                                                        }
-                                                }
-                                                .padding(.horizontal)
-                                                .padding(.vertical, 10)
-                                        }
-                                        .background(Color.black)
-                                        
-                                        //CONTENU
-                                        if viewModel.isLoading && viewModel.events.isEmpty {
-                                                Spacer()
-                                                ProgressView().tint(.white)
-                                                Spacer()
-                                        } else if filteredEvents.isEmpty {
-                                                Spacer()
-                                                ContentUnavailableView(
-                                                        "Aucun événement",
-                                                        systemImage: "magnifyingglass",
-                                                        description: Text("Essayez de modifier votre recherche ou vos filtres.")
-                                                )
-                                                .foregroundStyle(.white)
-                                                Spacer()
-                                        } else {
-                                                
-                                                // Adaptation Ipad/Iphone
-                                                if sizeClass == .regular {
-                                                        ScrollView {
-                                                                LazyVGrid(columns: UIConfig.Layout.gridColumns, spacing: 20) {
-                                                                        ForEach(filteredEvents) { event in
-                                                                                NavigationLink(destination: EventDetailView(event: event)) {
-                                                                                        EventRowView(event: event)
-                                                                                                .frame(height: 120) // Hauteur fixe pour la grille
-                                                                                }
-                                                                                .buttonStyle(PlainButtonStyle())
-                                                                        }
-                                                                }
-                                                                .padding()
-                                                        }
-                                                } else {
-                                                        List {
-                                                                ForEach(filteredEvents) { event in
-                                                                        NavigationLink(destination: EventDetailView(event: event)) {
-                                                                                EventRowView(event: event)
-                                                                        }
-                                                                        .listRowBackground(Color.clear)
-                                                                        .listRowSeparator(.hidden)
-                                                                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                                                                }
-                                                        }
-                                                        .listStyle(.plain)
-                                                        .refreshable {
-                                                                await viewModel.fetchEvents()
-                                                        }
-                                                }
-                                        }
+                        VStack(spacing: 0) {
+                                categoryFilterBar
+                                
+                                if viewModel.isLoading && viewModel.events.isEmpty {
+                                        Spacer()
+                                        ProgressView().tint(.white)
+                                        Spacer()
+                                } else if filteredEvents.isEmpty {
+                                        Spacer()
+                                        ContentUnavailableView(
+                                                "Aucun événement",
+                                                systemImage: "magnifyingglass",
+                                                description: Text("Essayez de modifier votre recherche ou vos filtres.")
+                                        )
+                                        .foregroundStyle(.white)
+                                        Spacer()
+                                } else {
+                                        eventsDisplay
                                 }
                         }
+                        .background(Color.black.ignoresSafeArea())
                         .navigationTitle("Événements")
                         .searchable(text: $searchText, prompt: "Rechercher...")
                         .toolbar {
                                 ToolbarItem(placement: .primaryAction) {
-                                        Button {
-                                                showAddSheet.toggle()
-                                        } label: {
+                                        Button { showAddSheet.toggle() } label: {
                                                 Image(systemName: "plus.circle.fill")
                                                         .font(.title2)
                                                         .foregroundStyle(.white)
                                         }
-                                        .accessibilityLabel("Créer un nouvel événement")
                                 }
                         }
+                        .overlay(alignment: .top) {
+                                if viewModel.showSuccessToast {
+                                        ToastView(message: viewModel.successMessage)
+                                                .padding(.top, 10)
+                                                .transition(.move(edge: .top).combined(with: .opacity))
+                                }
+                        }
+                        .animation(.spring(), value: viewModel.showSuccessToast)
                         .sheet(isPresented: $showAddSheet) {
                                 AddEventView()
                         }
@@ -136,11 +84,65 @@ struct EventListView: View {
                                 await viewModel.loadEventsIfNeeded()
                         }
                 }
-                .preferredColorScheme(.dark)
+        }
+        
+        // MARK: - Helper Subviews
+        
+        private var categoryFilterBar: some View {
+                ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 10) {
+                                FilterButton(title: "Tout", isSelected: viewModel.selectedCategory == nil) {
+                                        withAnimation { viewModel.selectedCategory = nil }
+                                }
+                                ForEach(EventCategory.allCases) { category in
+                                        FilterButton(title: category.rawValue, isSelected: viewModel.selectedCategory == category) {
+                                                withAnimation { viewModel.selectedCategory = category }
+                                        }
+                                }
+                        }
+                        .padding(.horizontal)
+                        .padding(.vertical, 10)
+                }
+                .background(Color.black)
+        }
+        
+        private var eventsDisplay: some View {
+                Group {
+                        if sizeClass == .regular {
+                                ScrollView {
+                                        LazyVGrid(columns: UIConfig.Layout.gridColumns, spacing: 20) {
+                                                ForEach(filteredEvents) { event in
+                                                        NavigationLink(destination: EventDetailView(event: event)) {
+                                                                EventRowView(event: event)
+                                                                        .frame(height: 120)
+                                                        }
+                                                        .buttonStyle(PlainButtonStyle())
+                                                }
+                                        }
+                                        .padding()
+                                }
+                        } else {
+                                List {
+                                        ForEach(filteredEvents) { event in
+                                                NavigationLink(destination: EventDetailView(event: event)) {
+                                                        EventRowView(event: event)
+                                                }
+                                                .listRowBackground(Color.clear)
+                                                .listRowSeparator(.hidden)
+                                        }
+                                }
+                                .listStyle(.plain)
+                                .refreshable {
+                                        await viewModel.fetchEvents()
+                                }
+                        }
+                }
         }
 }
 
-//Composant pour les boutons de filtre
+// MARK: COMPOSANTS
+
+// Bouton de filtre
 struct FilterButton: View {
         let title: String
         let isSelected: Bool
@@ -162,5 +164,20 @@ struct FilterButton: View {
                 }
                 .accessibilityLabel("Filtrer par catégorie \(title)")
                 .accessibilityAddTraits(isSelected ? .isSelected : [])
+        }
+}
+
+// Message de succès
+struct ToastView: View {
+        let message: String
+        var body: some View {
+                Text(message)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .font(.subheadline.bold())
+                        .cornerRadius(20)
+                        .shadow(radius: 5)
         }
 }

@@ -10,6 +10,7 @@ import PhotosUI
 
 struct EditEventView: View {
         
+        // dependence
         let event: Event
         
         @Environment(EventListViewModel.self) var eventListViewModel
@@ -95,11 +96,11 @@ struct EditEventView: View {
                                 }
                         }
                         .onAppear {
-                                self.title = event.title
-                                self.description = event.description
-                                self.location = event.location
-                                self.date = event.date
-                                self.selectedCategory = event.category
+                                title = event.title
+                                description = event.description
+                                location = event.location
+                                date = event.date
+                                selectedCategory = event.category
                         }
                         .onChange(of: selectedItem) { oldValue, newItem in
                                 
@@ -110,14 +111,13 @@ struct EditEventView: View {
                                                 if let data = try await item.loadTransferable(type: Data.self),
                                                    let uiImage = UIImage(data: data) {
                                                         
-                                                        self.selectedImage = uiImage
+                                                      selectedImage = uiImage
                                                         
                                                 } else {
                                                         print("Aucune donnée trouvée dans l'image sélectionnée.")
                                                 }
                                         } catch {
                                                 print("Erreur chargement image : \(error.localizedDescription)")
-                                                // une variable 'errorMessage': "Impossible de télécharger l'image depuis iCloud"
                                         }
                                 }
                         }

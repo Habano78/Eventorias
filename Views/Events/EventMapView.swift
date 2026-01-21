@@ -73,7 +73,7 @@ struct EventMapView: View {
                 }
         }
         
-        // Helpers (style)
+        //MARK:  Helpers (style)
         func iconName(for category: EventCategory) -> String {
                 switch category {
                 case .music: return "music.mic"
@@ -140,7 +140,6 @@ struct EventPreviewSheet: View {
                                 
                                 Spacer()
                                 
-                                // Le NavigationLink fonctionne maintenant car il est dans un NavigationStack (voir plus haut)
                                 NavigationLink(destination: EventDetailView(event: event)) {
                                         Text("Voir détails")
                                                 .font(.caption.bold())
@@ -154,7 +153,6 @@ struct EventPreviewSheet: View {
                         Spacer()
                 }
                 .padding()
-                // Ajout d'un titre vide pour que le NavigationStack ne prenne pas trop de place
                 .toolbar(.hidden, for: .navigationBar)
                 .background(Color(UIColor.secondarySystemBackground))
         }

@@ -9,51 +9,32 @@ import Foundation
 import FirebaseFirestore
 import FirebaseStorage
 
-// MARK: - Protocol
+// MARK: Contrat
 protocol EventServiceProtocol: Sendable {
         func fetchEvents() async throws -> [Event]
         func addEvent(_ event: Event) async throws
         func deleteEvent(eventId: String) async throws
         func editEvent(event: Event, title: String, description: String, date: Date, location: String, category: EventCategory, newImageData: Data?) async throws
         func updateParticipation(eventId: String, userId: String, isJoining: Bool) async throws
-        func uploadEventImage(data: Data) async throws -> String
+        func uploadEventImage(data: Data) async throws -> StorageUploadResult
 }
 
-// MARK: - Implementation
+
+//MARK: Implementation
 final class EventService: EventServiceProtocol {
         
-        //MARK: Dependences
         private let dataBase = Firestore.firestore()
         private let imageStorageService: ImageStorageServiceProtocol
         
-        
-        //MARK: Init
         init(imageStorageService: ImageStorageServiceProtocol) {
                 self.imageStorageService = imageStorageService
         }
         
-        
-        //MARK: Methodes
         func fetchEvents() async throws -> [Event] {
-                let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date()) ?? Date()
-                let snapshot = try await dataBase.collection("events")
-                        .whereField("date", isGreaterThan: sevenDaysAgo)
-                        .order(by: "date", descending: false)
-                        .limit(to: 50)
-                        .getDocuments()
-                /// Mapping des données
+                let snapshot = try await dataBase.collection("events").order(by: "date").getDocuments()
                 return snapshot.documents.compactMap { doc in
-                        
-                        do {
-                                let dto = try doc.data(as: EventDTO.self)
-                                return Event(dto: dto)
-                                
-                        } catch {
-                                print("ERREUR CRITIQUE sur l'event ID : \(doc.documentID)")
-                                print("Détail de l'erreur : \(error)")
-                                
-                                return nil
-                        }
+                        guard let dto = try? doc.data(as: EventDTO.self) else { return nil }
+                        return Event(dto: dto)
                 }
         }
         
@@ -76,8 +57,13 @@ final class EventService: EventServiceProtocol {
                 ]
                 
                 if let imageData = newImageData {
-                        let newImageURL = try await uploadEventImage(data: imageData)
-                        data["imageURL"] = newImageURL
+                        if let oldPath = event.imagePath {
+                                await imageStorageService.deleteImage(path: oldPath)
+                        }
+                        
+                        let result = try await uploadEventImage(data: imageData)
+                        data["imageURL"] = result.url
+                        data["imagePath"] = result.path
                 }
                 
                 try await dataBase.collection("events").document(event.id).updateData(data)
@@ -87,18 +73,16 @@ final class EventService: EventServiceProtocol {
                 let data: [String: Any] = isJoining
                 ? ["attendees": FieldValue.arrayUnion([userId])]
                 : ["attendees": FieldValue.arrayRemove([userId])]
-                
                 try await dataBase.collection("events").document(eventId).updateData(data)
         }
         
-        func uploadEventImage(data: Data) async throws -> String {
+        func uploadEventImage(data: Data) async throws -> StorageUploadResult {
                 let path = "events_images/\(UUID().uuidString).jpg"
-                // Délégation
                 return try await imageStorageService.uploadImage(data: data, path: path)
         }
 }
 
-// MARK: DTOs
+// MARK: DTOs & Mapping
 private struct EventDTO: Codable, Identifiable {
         @DocumentID var id: String?
         let userId: String
@@ -109,6 +93,7 @@ private struct EventDTO: Codable, Identifiable {
         let category: EventCategory
         let attendees: [String]
         let imageURL: String?
+        let imagePath: String?
         let latitude: Double
         let longitude: Double
 }
@@ -125,6 +110,7 @@ private extension Event {
                         category: dto.category,
                         attendees: dto.attendees,
                         imageURL: dto.imageURL,
+                        imagePath: dto.imagePath,
                         latitude: dto.latitude,
                         longitude: dto.longitude
                 )
@@ -143,6 +129,7 @@ private extension EventDTO {
                         category: event.category,
                         attendees: event.attendees,
                         imageURL: event.imageURL,
+                        imagePath: event.imagePath,
                         latitude: event.latitude,
                         longitude: event.longitude
                 )

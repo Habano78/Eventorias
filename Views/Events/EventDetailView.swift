@@ -5,12 +5,19 @@
 //  Created by Perez William on 15/12/2025.
 //
 
+//
+//  EventDetailView.swift
+//  Eventorias
+//
+//  Created by Perez William on 15/12/2025.
+//
+
 import SwiftUI
 import MapKit
 
 struct EventDetailView: View {
         
-        // MARK: properties
+        // MARK: - Properties
         let event: Event
         
         @Environment(\.dismiss) var dismiss
@@ -20,7 +27,7 @@ struct EventDetailView: View {
         @State private var showEditSheet = false
         @State private var showDeleteAlert = false
         
-        //MARK: Computed Properties
+        // MARK: - Computed Properties
         var isParticipating: Bool {
                 guard let currentUserId = eventListViewModel.currentUserId else { return false }
                 if let liveEvent = eventListViewModel.events.first(where: { $0.id == event.id }) {
@@ -45,40 +52,62 @@ struct EventDetailView: View {
         """
         }
         
-        // MARK: body
+        // MARK: - Body
         var body: some View {
-                ScrollView {
-                        // Adaptation Ipad/Iphone
-                        if sizeClass == .regular {
-                                HStack(alignment: .top, spacing: 30) {
-                                        VStack(spacing: 20) {
-                                                mainImageSection
-                                                mapSection
+                ZStack {
+                        Color.black.ignoresSafeArea()
+                        ScrollView {
+                                // Adaptation Ipad/Iphone
+                                if sizeClass == .regular {
+                                        HStack(alignment: .top, spacing: 30) {
+                                                VStack(spacing: 20) {
+                                                        mainImageSection
+                                                        mapSection
+                                                }
+                                                .frame(maxWidth: .infinity)
+                                                
+                                                VStack(alignment: .leading, spacing: 20) {
+                                                        headerInfoSection
+                                                        Divider().background(Color.gray)
+                                                        descriptionSection
+                                                        actionSection
+                                                }
+                                                .frame(maxWidth: .infinity)
                                         }
-                                        .frame(maxWidth: .infinity)
+                                        .padding(30)
                                         
+                                } else {
+                                        // IPHONE
                                         VStack(alignment: .leading, spacing: 20) {
+                                                mainImageSection
                                                 headerInfoSection
-                                                Divider().background(Color.gray)
                                                 descriptionSection
                                                 actionSection
+                                                mapSection
                                         }
-                                        .frame(maxWidth: .infinity)
+                                        .padding()
                                 }
-                                .padding(30)
-                                
-                        } else {
-                                // IPHONE
-                                VStack(alignment: .leading, spacing: 20) {
-                                        mainImageSection
-                                        headerInfoSection
-                                        descriptionSection
-                                        actionSection
-                                        mapSection
-                                }
-                                .padding()
                         }
                 }
+                .background(Color.black.ignoresSafeArea())
+                .navigationBarBackButtonHidden(false)
+                .navigationTitle(event.title)
+                .navigationBarTitleDisplayMode(.inline)
+                
+                // MARK: - Modificateur Alerte
+                .alert("Supprimer l'événement", isPresented: $showDeleteAlert) {
+                        Button("Supprimer", role: .destructive) {
+                                Task {
+                                        await eventListViewModel.deleteEvent(event)
+                                        dismiss()
+                                }
+                        }
+                        Button("Annuler", role: .cancel) { }
+                } message: {
+                        Text("Êtes-vous sûr de vouloir supprimer cet événement ? Cette action est définitive.")
+                }
+                
+                // MARK: - Toolbar & Sheets
                 .toolbar {
                         ToolbarItem(placement: .topBarTrailing) {
                                 ShareLink(item: shareMessage) {
@@ -88,7 +117,6 @@ struct EventDetailView: View {
                         }
                         
                         if eventListViewModel.isOwner(of: event) {
-                                
                                 ToolbarItem(placement: .topBarTrailing) {
                                         Menu {
                                                 /// Modifier
@@ -98,8 +126,7 @@ struct EventDetailView: View {
                                                         Label("Modifier", systemImage: "pencil")
                                                 }
                                                 
-                                                Text("aqui no va nada")
-                                                /// Supprimer
+                                                /// Supprimer (déclenche l'alerte)
                                                 Button(role: .destructive) {
                                                         showDeleteAlert = true
                                                 } label: {
@@ -108,6 +135,7 @@ struct EventDetailView: View {
                                                 
                                         } label: {
                                                 Image(systemName: "ellipsis.circle")
+                                                        .foregroundStyle(.white)
                                         }
                                 }
                         }
@@ -115,14 +143,9 @@ struct EventDetailView: View {
                 .sheet(isPresented: $showEditSheet) {
                         EditEventView(event: event)
                 }
-                .background(Color.black.ignoresSafeArea())
-                .navigationBarBackButtonHidden(false)
-                .navigationTitle(event.title)
-                .navigationBarTitleDisplayMode(.inline)
         }
         
-        
-        // MARK: Subviews
+        // MARK: - Subviews
         
         private var mainImageSection: some View {
                 Group {
@@ -143,8 +166,6 @@ struct EventDetailView: View {
                 .frame(minWidth: 0, maxWidth: .infinity)
                 .clipped()
                 .clipShape(RoundedRectangle(cornerRadius: 24))
-                .accessibilityLabel("Photo de l'événement \(event.title)")
-                .accessibilityAddTraits(.isImage)
         }
         
         private var headerInfoSection: some View {
@@ -155,28 +176,23 @@ struct EventDetailView: View {
                                         Text(event.date.formatted(.dateTime.year().month(.wide).day()))
                                 }
                                 .foregroundStyle(.white)
-                                .accessibilityElement(children: .combine)
-                                .accessibilityLabel("Date : \(event.date.formatted(date: .long, time: .omitted))")
                                 
                                 HStack {
                                         Image(systemName: "clock")
                                         Text(event.date.formatted(date: .omitted, time: .shortened))
                                 }
                                 .foregroundStyle(.white)
-                                .accessibilityElement(children: .combine)
-                                .accessibilityLabel("Heure : \(event.date.formatted(date: .omitted, time: .shortened))")
                         }
                         .font(sizeClass == .regular ? .title3 : .subheadline)
                         
                         Spacer()
                         
-                        Image("Avatar (3)")
+                        Image("Avatar (3)") // Placeholder pour l'organisateur
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
                                 .frame(width: 60, height: 60)
                                 .clipShape(Circle())
                                 .shadow(radius: 5)
-                                .accessibilityLabel("Avatar de l'organisateur")
                 }
         }
         
@@ -198,14 +214,11 @@ struct EventDetailView: View {
                         .padding(.vertical, 8)
                         .background(Color(white: 0.2))
                         .clipShape(Capsule())
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel("\(attendeesCount) participants")
                         
                         Text(" participants")
                                 .font(.subheadline)
                                 .foregroundStyle(.gray)
                                 .padding(.leading, 8)
-                                .accessibilityHidden(true)
                         
                         Spacer()
                         
@@ -230,10 +243,6 @@ struct EventDetailView: View {
                                 .clipShape(Capsule())
                                 .shadow(color: isParticipating ? .clear : .blue.opacity(0.4), radius: 10, x: 0, y: 5)
                         }
-                        .padding(.vertical, 5)
-                        .accessibilityLabel(isParticipating ? "Se désinscrire" : "S'inscrire")
-                        .accessibilityHint(isParticipating ? "Annuler votre venue" : "Rejoindre l'événement")
-                        .accessibilityAddTraits(isParticipating ? .isSelected : [])
                 }
                 .padding(.vertical, 5)
         }
@@ -248,7 +257,6 @@ struct EventDetailView: View {
                         }
                         .padding(.top, 8)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .accessibilityLabel("Adresse : \(event.location)")
                         
                         Map(initialPosition: .region(MKCoordinateRegion(
                                 center: CLLocationCoordinate2D(latitude: event.latitude, longitude: event.longitude),
@@ -259,8 +267,6 @@ struct EventDetailView: View {
                         .frame(width: 130, height: 100)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .disabled(true)
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel("Carte centrée sur \(event.location)")
                 }
                 .padding(.bottom, 80)
         }

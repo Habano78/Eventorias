@@ -34,7 +34,6 @@ class AuthViewModel {
                 
                 self.isUserSignedIn = authService.currentUserId != nil
                 
-                /// Vérification session au démarrage
                 if let userID = authService.currentUserId {
                         Task { await fetchUser(fireBaseUserId: userID) }
                 }
@@ -69,6 +68,7 @@ class AuthViewModel {
                                 email: email,
                                 name: "Nouvel Utilisateur",
                                 profileImageURL: nil,
+                                profileImagePath: nil,
                                 isNotificationsEnabled: false
                         )
                         
@@ -114,9 +114,15 @@ class AuthViewModel {
                 
                 do {
                         var imageURL: String? = currentUser?.profileImageURL
+                        var imagePath: String? = currentUser?.profileImagePath
                         
                         if let image = image, let imageData = image.jpegData(compressionQuality: 0.5) {
-                                imageURL = try await userService.uploadProfileImage(data: imageData)
+                                if imagePath != nil {
+                                }
+                                
+                                let result = try await userService.uploadProfileImage(data: imageData)
+                                imageURL = result.url
+                                imagePath = result.path
                         }
                         
                         let updatedUser = User(
@@ -124,6 +130,7 @@ class AuthViewModel {
                                 email: email,
                                 name: name,
                                 profileImageURL: imageURL,
+                                profileImagePath: imagePath,
                                 isNotificationsEnabled: isNotifEnabled
                         )
                         

@@ -23,6 +23,8 @@ class EventListViewModel {
         var isLoading = false
         var errorMessage: String?
         var selectedCategory: EventCategory? = nil
+        var showSuccessToast = false
+        var successMessage = ""
         
         var currentUserId: String? {
                 return authService.currentUserId
@@ -37,7 +39,16 @@ class EventListViewModel {
                 self.authService = authService
         }
         
-        // MARK: Lecture -Fetch
+        
+        //MARK: Actions
+        
+        func loadEventsIfNeeded() async {
+                if events.isEmpty {
+                        await fetchEvents()
+                }
+        }
+        
+        
         func fetchEvents() async {
                 isLoading = true
                 errorMessage = nil
@@ -50,23 +61,12 @@ class EventListViewModel {
                 isLoading = false
         }
         
-        
-        //MARK: Methods
-        
-        func loadEventsIfNeeded() async {
-                if events.isEmpty {
-                        await fetchEvents()
-                }
-        }
-        
-        //MARK: isOwner
+       
         func isOwner(of event: Event) -> Bool {
                 guard let currentUid = currentUserId else { return false }
                 return event.userId == currentUid
         }
         
-        
-        // MARK: Écriture -Add, Edit, Delete
         
         func addEvent(title: String, description: String, date: Date, location: String, category: EventCategory, latitude: Double, longitude: Double, newImageData: Data?) async {
                 guard let uid = currentUserId else { return }
@@ -74,8 +74,14 @@ class EventListViewModel {
                 
                 do {
                         var imageURL: String? = nil
+                        var imagePath: String? = nil
+                        
                         if let imageData = newImageData {
-                                imageURL = try await eventService.uploadEventImage(data: imageData)
+                                let result = try await eventService.uploadEventImage(
+                                        data: imageData
+                                )
+                                imageURL = result.url
+                                imagePath = result.path
                         }
                         
                         let newEvent = Event(
@@ -87,6 +93,7 @@ class EventListViewModel {
                                 category: category,
                                 attendees: [uid],
                                 imageURL: imageURL,
+                                imagePath: imagePath,
                                 latitude: latitude,
                                 longitude: longitude
                         )
@@ -102,8 +109,8 @@ class EventListViewModel {
         }
         
         func editEvent(event: Event, title: String, description: String, date: Date, location: String, category: EventCategory, newImageData: Data?) async {
-                isLoading = true
                 
+                isLoading = true
                 do {
                         try await eventService.editEvent(
                                 event: event,
@@ -115,10 +122,11 @@ class EventListViewModel {
                                 newImageData: newImageData
                         )
                         
-                        if let currentUid = currentUserId, event.attendees.contains(currentUid) {
+                        if let currentUid = currentUserId, event.attendees
+                                .contains(currentUid) {
                                 cancelNotification(for: event)
                                 
-                                let updatedEventForNotif = Event(
+                                let updatedEvent = Event(
                                         id: event.id,
                                         userId: event.userId,
                                         title: title,
@@ -128,12 +136,17 @@ class EventListViewModel {
                                         category: category,
                                         attendees: event.attendees,
                                         imageURL: event.imageURL,
-                                        latitude: event.latitude, longitude: event.longitude)
+                                        imagePath: event.imagePath,
+                                        latitude: event.latitude,
+                                        longitude: event.longitude
+                                )
                                 
-                                scheduleNotification(for: updatedEventForNotif)
+                                scheduleNotification(for: updatedEvent)
                         }
                         
-                        if let index = events.firstIndex(where: { $0.id == event.id }) {
+                        if let index = events.firstIndex(
+                                where: { $0.id == event.id
+                                }) {
                                 
                                 var eventToUpdate = events[index]
                                 
@@ -163,6 +176,15 @@ class EventListViewModel {
                 do {
                         try await eventService.deleteEvent(eventId: event.id)
                         cancelNotification(for: event)
+                        
+                        successMessage = "Événement supprimé avec succès"
+                        showSuccessToast = true
+                        
+                        Task {
+                                try? await Task.sleep(nanoseconds: 3_000_000_000)
+                                showSuccessToast = false
+                        }
+                        
                 } catch {
                         print(" Erreur suppression : \(error)")
                         
@@ -171,7 +193,6 @@ class EventListViewModel {
                         } else {
                                 events.append(event)
                         }
-                        
                         errorMessage = "Impossible de supprimer l'événement."
                 }
         }
@@ -180,7 +201,9 @@ class EventListViewModel {
         
         func toggleParticipation(event: Event) async {
                 guard let currentUserId = currentUserId else { return }
-                guard let index = events.firstIndex(where: { $0.id == event.id }) else { return }
+                guard let index = events.firstIndex(where: { $0.id == event.id }) else {
+                        return
+                }
                 
                 var updatedEvent = events[index]
                 
@@ -193,8 +216,15 @@ class EventListViewModel {
                 events[index] = updatedEvent
                 
                 do {
-                        let isJoining = updatedEvent.attendees.contains(currentUserId)
-                        try await eventService.updateParticipation(eventId: event.id, userId: currentUserId, isJoining: isJoining)
+                        let isJoining = updatedEvent.attendees.contains(
+                                currentUserId
+                        )
+                        try await eventService
+                                .updateParticipation(
+                                        eventId: event.id,
+                                        userId: currentUserId,
+                                        isJoining: isJoining
+                                )
                 } catch {
                         events[index] = event
                         errorMessage = "Impossible de modifier la participation."
@@ -202,12 +232,12 @@ class EventListViewModel {
         }
         
         
-        // MARK: - Nettoyage Logout
+        // MARK: Nettoyage Logout
         func clearData() {
-                self.events = []
-                self.selectedCategory = nil
-                self.errorMessage = nil
-                self.isLoading = false
+                events = []
+                selectedCategory = nil
+                errorMessage = nil
+                isLoading = false
         }
         
         // MARK: Notifications
@@ -220,14 +250,29 @@ class EventListViewModel {
                 let triggerDate = event.date.addingTimeInterval(-1800)
                 if triggerDate < Date() { return }
                 
-                let comps = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: triggerDate)
-                let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)
-                let request = UNNotificationRequest(identifier: event.id, content: content, trigger: trigger)
+                let comps = Calendar.current.dateComponents(
+                        [.year, .month, .day, .hour, .minute],
+                        from: triggerDate
+                )
+                let trigger = UNCalendarNotificationTrigger(
+                        dateMatching: comps,
+                        repeats: false
+                )
+                let request = UNNotificationRequest(
+                        identifier: event.id,
+                        content: content,
+                        trigger: trigger
+                )
                 
                 UNUserNotificationCenter.current().add(request)
         }
         
+        //
         private func cancelNotification(for event: Event) {
-                UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: [event.id])
+                UNUserNotificationCenter
+                        .current()
+                        .removePendingNotificationRequests(
+                                withIdentifiers: [event.id]
+                        )
         }
 }
