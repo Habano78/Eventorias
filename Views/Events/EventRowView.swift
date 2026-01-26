@@ -9,51 +9,53 @@ import SwiftUI
 
 struct EventRowView: View {
         
-        // MARK: Properties
         let event: Event
         
-        // MARK: Body
         var body: some View {
-                
-                HStack(spacing: 0) {
+                HStack(spacing: 12) {
                         
-                        HStack(spacing: 12) {
+                        // Image
+                        if let urlString = event.imageURL, let url = URL(string: urlString) {
+                                AsyncImage(url: url) { image in
+                                        image.resizable().aspectRatio(contentMode: .fill)
+                                } placeholder: {
+                                        Color.gray.opacity(0.3)
+                                }
+                                .frame(width: 70, height: 70)
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
                                 
-                                Image(systemName: "person.crop.circle.fill")
+                        } else {
+                                Image(event.category.assetName)
                                         .resizable()
                                         .aspectRatio(contentMode: .fill)
-                                        .frame(width: 50, height: 50)
-                                        .foregroundStyle(.gray)
-                                        .clipShape(Circle())
-                                
-                                VStack(alignment: .leading, spacing: 4) {
-                                        
-                                        Text(event.title)
-                                                .font(.headline)
-                                                .fontWeight(.bold)
-                                                .foregroundStyle(.white)
-                                                .lineLimit(2)
-                                        
-                                        Text(event.date.formatted(.dateTime.year().month(.wide).day()))
-                                                .font(.subheadline)
-                                                .foregroundStyle(.gray)
-                                }
+                                        .frame(width: 70, height: 70)
+                                        .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
-                        .padding(14)
+                        
+                        // Texte
+                        VStack(alignment: .leading, spacing: 4) {
+                                Text(event.title)
+                                        .font(.headline)
+                                        .fontWeight(.bold)
+                                        .foregroundStyle(.primary)
+                                        .lineLimit(2)
+                                
+                                Text(event.date.formatted(date: .abbreviated, time: .shortened))
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                
+                                Text(event.location)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(1)
+                        }
                         
                         Spacer()
-                        
-                        Image(event.category.assetName)
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 120, height: 90)
-                                .clipped()
-                                .background(Color(white: 0.12))
-                                .clipShape(RoundedRectangle(cornerRadius: 16))
-                                .accessibilityElement(children: .ignore)
-                                .accessibilityLabel("Événement \(event.title), le \(event.date.formatted(date: .long, time: .omitted)), à \(event.location)")
-                                .accessibilityHint("Double-tapez pour voir les détails")
-                                .accessibilityAddTraits(.isButton)
                 }
+                .padding(.vertical, 8)
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel("Événement \(event.title), le \(event.date.formatted(date: .long, time: .omitted)) à \(event.location)")
+                .accessibilityHint("Double-tapez pour voir les détails")
+                .accessibilityAddTraits(.isButton)
         }
 }

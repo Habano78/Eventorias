@@ -19,57 +19,54 @@ struct EventMapView: View {
         //MARK: Body
         var body: some View {
                 NavigationStack {
-                        MapReader { proxy in
-                                Map(position: $position, interactionModes: .all, selection: $selectedEvent) {
-                                        
-                                        ForEach(eventListViewModel.events) { event in
-                                                Annotation(event.title, coordinate: CLLocationCoordinate2D(latitude: event.latitude, longitude: event.longitude)) {
-                                                        ZStack {
-                                                                RoundedRectangle(cornerRadius: 8)
-                                                                        .fill(event.category.color)
-                                                                        .frame(width: 35, height: 35)
-                                                                        .shadow(radius: 3)
-                                                                
-                                                                Image(systemName: event.category.iconName)
-                                                                        .foregroundColor(.white)
-                                                                        .font(.caption.bold())
-                                                                
-                                                                Image(systemName: "triangle.fill")
-                                                                        .resizable()
-                                                                        .frame(width: 10, height: 8)
-                                                                        .foregroundColor(event.category.color)
-                                                                        .offset(y: 22)
-                                                                        .rotationEffect(.degrees(180))
-                                                        }
-                                                        .scaleEffect(selectedEvent == event ? 1.2 : 1.0)
-                                                        .animation(.spring(), value: selectedEvent)
+                        Map(position: $position, interactionModes: .all, selection: $selectedEvent) {
+                                ForEach(eventListViewModel.events) { event in
+                                        Annotation(event.title, coordinate: CLLocationCoordinate2D(latitude: event.latitude, longitude: event.longitude)) {
+                                                ZStack {
+                                                        RoundedRectangle(cornerRadius: 8)
+                                                                .fill(event.category.color)
+                                                                .frame(width: 35, height: 35)
+                                                                .shadow(radius: 3)
+                                                        
+                                                        Image(systemName: event.category.iconName)
+                                                                .foregroundColor(.white)
+                                                                .font(.caption.bold())
+                                                        
+                                                        Image(systemName: "triangle.fill")
+                                                                .resizable()
+                                                                .frame(width: 10, height: 8)
+                                                                .foregroundColor(event.category.color)
+                                                                .offset(y: 22)
+                                                                .rotationEffect(.degrees(180))
                                                 }
-                                                .tag(event)
+                                                .scaleEffect(selectedEvent == event ? 1.2 : 1.0)
+                                                .animation(.spring(), value: selectedEvent)
                                         }
-                                        
-                                        UserAnnotation()
+                                        .tag(event)
                                 }
-                                .mapStyle(.standard(elevation: .realistic))
-                                .mapControls {
-                                        MapUserLocationButton()
-                                        MapCompass()
-                                        MapScaleView()
-                                }
-                                .task {
-                                        await eventListViewModel.loadEventsIfNeeded()
-                                }
-                                .sheet(item: $selectedEvent) { event in
-                                        NavigationStack {
-                                                EventPreviewSheet(event: event)
-                                        }
-                                        .environment(eventListViewModel)
-                                        .presentationDetents([.fraction(0.3), .medium])
-                                        .presentationBackgroundInteraction(.enabled(upThrough: .fraction(0.3)))
-                                }
+                                
+                                UserAnnotation()
                         }
-                        .navigationTitle("Carte des Événements")
-                        .navigationBarTitleDisplayMode(.inline)
+                        .mapStyle(.standard(elevation: .realistic))
+                        .mapControls {
+                                MapUserLocationButton()
+                                MapCompass()
+                                MapScaleView()
+                        }
+                        .task {
+                                await eventListViewModel.loadEventsIfNeeded()
+                        }
+                        .sheet(item: $selectedEvent) { event in
+                                NavigationStack {
+                                        EventPreviewSheet(event: event)
+                                }
+                                .environment(eventListViewModel)
+                                .presentationDetents([.fraction(0.3), .medium])
+                                .presentationBackgroundInteraction(.enabled(upThrough: .fraction(0.3)))
+                        }
                 }
+                .navigationTitle("Carte des Événements")
+                .navigationBarTitleDisplayMode(.inline)
         }
         
 }
