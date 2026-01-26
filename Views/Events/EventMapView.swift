@@ -10,35 +10,34 @@ import MapKit
 
 struct EventMapView: View {
         
-        @Environment(EventListViewModel.self) var viewModel
+        //MARK: dependence
+        @Environment(EventListViewModel.self) var eventListViewModel
         
-        // Position initiale
         @State private var position: MapCameraPosition = .automatic
-        
-        // L'événement sélectionné
         @State private var selectedEvent: Event?
         
+        //MARK: Body
         var body: some View {
                 NavigationStack {
                         MapReader { proxy in
                                 Map(position: $position, interactionModes: .all, selection: $selectedEvent) {
                                         
-                                        ForEach(viewModel.events) { event in
+                                        ForEach(eventListViewModel.events) { event in
                                                 Annotation(event.title, coordinate: CLLocationCoordinate2D(latitude: event.latitude, longitude: event.longitude)) {
                                                         ZStack {
                                                                 RoundedRectangle(cornerRadius: 8)
-                                                                        .fill(backgroundColor(for: event.category))
+                                                                        .fill(event.category.color)
                                                                         .frame(width: 35, height: 35)
                                                                         .shadow(radius: 3)
                                                                 
-                                                                Image(systemName: iconName(for: event.category))
+                                                                Image(systemName: event.category.iconName)
                                                                         .foregroundColor(.white)
                                                                         .font(.caption.bold())
                                                                 
                                                                 Image(systemName: "triangle.fill")
                                                                         .resizable()
                                                                         .frame(width: 10, height: 8)
-                                                                        .foregroundColor(backgroundColor(for: event.category))
+                                                                        .foregroundColor(event.category.color)
                                                                         .offset(y: 22)
                                                                         .rotationEffect(.degrees(180))
                                                         }
@@ -57,13 +56,13 @@ struct EventMapView: View {
                                         MapScaleView()
                                 }
                                 .task {
-                                        await viewModel.loadEventsIfNeeded()
+                                        await eventListViewModel.loadEventsIfNeeded()
                                 }
                                 .sheet(item: $selectedEvent) { event in
                                         NavigationStack {
                                                 EventPreviewSheet(event: event)
                                         }
-                                        .environment(viewModel)
+                                        .environment(eventListViewModel)
                                         .presentationDetents([.fraction(0.3), .medium])
                                         .presentationBackgroundInteraction(.enabled(upThrough: .fraction(0.3)))
                                 }
@@ -73,35 +72,10 @@ struct EventMapView: View {
                 }
         }
         
-        //MARK:  Helpers (style)
-        func iconName(for category: EventCategory) -> String {
-                switch category {
-                case .music: return "music.mic"
-                case .sport: return "figure.run"
-                case .book: return "paintpalette.fill"
-                case .art: return "party.popper.fill"
-                case .tech: return "bolt.fill"
-                case .film: return "book.fill"
-                case .food: return "gift.fill"
-                case .other: return "questionmark.circle.fill"
-                }
-        }
-        func backgroundColor(for category: EventCategory) -> Color {
-                switch category {
-                case .music: return .purple
-                case .sport: return .orange
-                case .book: return .red
-                case .art: return .pink
-                case .food: return .cyan
-                case .tech: return .yellow
-                case .film: return .green
-                case .other: return .gray
-                }
-        }
 }
 
-// Vue partielle pour l'aperçu
-struct EventPreviewSheet: View {
+//MARK: Vue partielle pour l'aperçu
+private struct EventPreviewSheet: View {
         let event: Event
         
         var body: some View {

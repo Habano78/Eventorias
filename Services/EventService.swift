@@ -23,13 +23,17 @@ protocol EventServiceProtocol: Sendable {
 //MARK: Implementation
 final class EventService: EventServiceProtocol {
         
+        //MARK: dependencies
         private let dataBase = Firestore.firestore()
         private let imageStorageService: ImageStorageServiceProtocol
         
+        //MARK: init
         init(imageStorageService: ImageStorageServiceProtocol) {
                 self.imageStorageService = imageStorageService
         }
         
+        //MARK: actions
+        ///
         func fetchEvents() async throws -> [Event] {
                 let snapshot = try await dataBase.collection("events").order(by: "date").getDocuments()
                 return snapshot.documents.compactMap { doc in
@@ -38,15 +42,18 @@ final class EventService: EventServiceProtocol {
                 }
         }
         
+        ///
         func addEvent(_ event: Event) async throws {
                 let dto = EventDTO(from: event)
                 try dataBase.collection("events").document(event.id).setData(from: dto)
         }
         
+        ///
         func deleteEvent(eventId: String) async throws {
                 try await dataBase.collection("events").document(eventId).delete()
         }
         
+        ///
         func editEvent(event: Event, title: String, description: String, date: Date, location: String, category: EventCategory, newImageData: Data?) async throws {
                 var data: [String: Any] = [
                         "title": title,
@@ -69,6 +76,7 @@ final class EventService: EventServiceProtocol {
                 try await dataBase.collection("events").document(event.id).updateData(data)
         }
         
+        ///
         func updateParticipation(eventId: String, userId: String, isJoining: Bool) async throws {
                 let data: [String: Any] = isJoining
                 ? ["attendees": FieldValue.arrayUnion([userId])]
@@ -76,6 +84,7 @@ final class EventService: EventServiceProtocol {
                 try await dataBase.collection("events").document(eventId).updateData(data)
         }
         
+        ///
         func uploadEventImage(data: Data) async throws -> StorageUploadResult {
                 let path = "events_images/\(UUID().uuidString).jpg"
                 return try await imageStorageService.uploadImage(data: data, path: path)

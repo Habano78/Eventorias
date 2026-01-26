@@ -23,7 +23,6 @@ struct AddEventView: View {
         
         /// Gestion Image
         @State private var selectedItem: PhotosPickerItem? = nil
-        @State private var selectedImageData: Data? = nil
         @State private var selectedImage: UIImage? = nil
         
         @State private var isSaving = false

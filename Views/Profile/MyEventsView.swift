@@ -13,6 +13,7 @@ struct MyEventsView: View {
         @Environment(EventListViewModel.self) var eventListViewModel
         @Environment(\.horizontalSizeClass) var sizeClass
         
+        
         //MARK: Computed properties
         var myTickets: [Event] {
                 guard let currentUserId = eventListViewModel.currentUserId else { return [] }
@@ -22,8 +23,7 @@ struct MyEventsView: View {
                 }
         }
         
-        
-        
+
         //MARK: body
         var body: some View {
                 NavigationStack {
