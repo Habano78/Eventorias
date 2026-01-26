@@ -73,6 +73,7 @@ struct EventMapView: View {
 
 //MARK: Vue partielle pour l'aperçu
 private struct EventPreviewSheet: View {
+        
         let event: Event
         
         var body: some View {
@@ -89,9 +90,12 @@ private struct EventPreviewSheet: View {
                                 .cornerRadius(12)
                                 .clipped()
                         } else {
-                                RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color.gray.opacity(0.2))
+                                Image(event.category.assetName)
+                                        .resizable()
+                                        .scaledToFill()
                                         .frame(width: 80, height: 80)
+                                        .cornerRadius(12)
+                                        .clipped()
                                         .overlay(Image(systemName: "photo").foregroundStyle(.gray))
                         }
                         
